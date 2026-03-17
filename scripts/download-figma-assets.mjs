@@ -1,0 +1,302 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
+
+const outputDir = path.join(process.cwd(), "public", "assets", "figma");
+
+const assets = [
+  [
+    "hmpg-logo-mark.png",
+    "https://www.figma.com/api/mcp/asset/1672d8af-092c-4ac1-8f02-64a31745f160",
+  ],
+  [
+    "hmpg-logo-large.png",
+    "https://www.figma.com/api/mcp/asset/6ccb33db-785f-469b-94bd-0ebc2ab5003d",
+  ],
+  [
+    "footer-logo-mark.png",
+    "https://www.figma.com/api/mcp/asset/78435252-4833-4e8f-99d8-10c9819d522e",
+  ],
+  [
+    "home-hero-flag.png",
+    "https://www.figma.com/api/mcp/asset/8bd5976a-060f-4946-8b21-b97a440d60c4",
+  ],
+  [
+    "home-summary-texture.png",
+    "https://www.figma.com/api/mcp/asset/34eded04-e98c-40f2-b09a-1c6b1ea8fa92",
+  ],
+  [
+    "home-desa-binaan.png",
+    "https://www.figma.com/api/mcp/asset/6d2fc2b1-b1d5-44eb-9b88-78c50e2dee0f",
+  ],
+  [
+    "home-research-grant.png",
+    "https://www.figma.com/api/mcp/asset/8130a7b9-55ff-4c83-b7ea-e242c9d5718c",
+  ],
+  [
+    "home-featured-seminar.png",
+    "https://www.figma.com/api/mcp/asset/198cded2-310e-4832-9245-65c51f3225bf",
+  ],
+  [
+    "about-hero.png",
+    "https://www.figma.com/api/mcp/asset/6dbe75f5-5a18-4952-b975-eab001acf33b",
+  ],
+  [
+    "about-hero-edited.png",
+    "https://www.figma.com/api/mcp/asset/a13cb654-063e-4575-b4d1-d0ce24086117",
+  ],
+  [
+    "about-campus-building.png",
+    "https://www.figma.com/api/mcp/asset/416f474a-0eef-4137-a233-b466e62a91e2",
+  ],
+  [
+    "about-campus-building-edited.png",
+    "https://www.figma.com/api/mcp/asset/766d1a4e-dd26-460f-9488-4396e60ef0b8",
+  ],
+  [
+    "about-logo-identity.png",
+    "https://www.figma.com/api/mcp/asset/71e01273-ebbd-479d-acfe-e23c09fde7bf",
+  ],
+  [
+    "about-canvas-texture.png",
+    "https://www.figma.com/api/mcp/asset/3c439ea3-4289-4a8d-abe6-f676fcf366ee",
+  ],
+  [
+    "about-vision-badge.png",
+    "https://www.figma.com/api/mcp/asset/6ffa0eac-a203-4f4c-9463-c2e02d2fd1fe",
+  ],
+  [
+    "about-value-integritas.svg",
+    "https://www.figma.com/api/mcp/asset/4a2c8110-4e61-4045-8400-07d7fbeec4d5",
+  ],
+  [
+    "about-value-sinergi.svg",
+    "https://www.figma.com/api/mcp/asset/0c7010d8-9ff0-425c-9c05-80326f660a3b",
+  ],
+  [
+    "about-value-inovasi.svg",
+    "https://www.figma.com/api/mcp/asset/81ec51ac-5ec0-4511-a3ee-3483709d3499",
+  ],
+  [
+    "about-value-kreatif.svg",
+    "https://www.figma.com/api/mcp/asset/d82b3c6c-3a09-4e96-ad1e-4e7c0d8495b7",
+  ],
+  [
+    "canvas-texture.png",
+    "https://www.figma.com/api/mcp/asset/4f7bd0b0-c696-4a34-bb02-dc9d581ec00b",
+  ],
+  [
+    "reports-hero.png",
+    "https://www.figma.com/api/mcp/asset/51c9fb3a-4274-4cf6-a6e7-1c03cccc7285",
+  ],
+  [
+    "reports-hero-edited.png",
+    "https://www.figma.com/api/mcp/asset/d24f1388-5b37-446f-b770-bac1419ebd7d",
+  ],
+  [
+    "reports-featured-cover.png",
+    "https://www.figma.com/api/mcp/asset/9c5a279f-2bbe-48dc-b9bf-deb189fc1af3",
+  ],
+  [
+    "reports-featured-terrace.png",
+    "https://www.figma.com/api/mcp/asset/ca82ed70-0e06-4587-af5c-088fa4174da3",
+  ],
+  [
+    "reports-card-keilmuan.png",
+    "https://www.figma.com/api/mcp/asset/f52e5513-9451-4e6b-b699-a74ad1b599fc",
+  ],
+  [
+    "reports-card-pengmas.png",
+    "https://www.figma.com/api/mcp/asset/ffba0f6a-b3cb-490f-84ef-96517a49324a",
+  ],
+  [
+    "reports-card-kaderisasi.png",
+    "https://www.figma.com/api/mcp/asset/85ca4341-726a-4f99-85a1-8695e17eb103",
+  ],
+  [
+    "reports-card-keuangan.png",
+    "https://www.figma.com/api/mcp/asset/6cb7620b-8c95-44d4-a75e-e97c39680c8b",
+  ],
+  [
+    "reports-card-inventaris.png",
+    "https://www.figma.com/api/mcp/asset/7673afb4-3ab2-421a-a418-72befe6a115e",
+  ],
+  [
+    "reports-card-seminar.png",
+    "https://www.figma.com/api/mcp/asset/52830a89-fd8d-4b91-8d6b-7ca83055019f",
+  ],
+  [
+    "reports-drive-icon.svg",
+    "https://www.figma.com/api/mcp/asset/65a29a14-3ec5-4651-a4a6-8398e7d9dd75",
+  ],
+  [
+    "reports-drive-arrow.svg",
+    "https://www.figma.com/api/mcp/asset/b9721d4c-7009-4f4a-b750-08914f496474",
+  ],
+  [
+    "reports-search-icon.svg",
+    "https://www.figma.com/api/mcp/asset/63fe9688-c0f2-407d-8a2d-f6e2657f16f1",
+  ],
+  [
+    "reports-filter-chevron.svg",
+    "https://www.figma.com/api/mcp/asset/988204d6-25d3-4038-b0bc-c45bc3ddad8c",
+  ],
+  [
+    "reports-featured-arrow.svg",
+    "https://www.figma.com/api/mcp/asset/7559c1c7-4c15-4544-b41b-b7d650bd7e66",
+  ],
+  [
+    "reports-pagination-prev.svg",
+    "https://www.figma.com/api/mcp/asset/cd435c64-f83c-4603-af5e-1bb0b696ac9b",
+  ],
+  [
+    "reports-pagination-next.svg",
+    "https://www.figma.com/api/mcp/asset/29e86680-7586-4d3d-a863-7739ca768c1d",
+  ],
+  [
+    "report-detail-hero.png",
+    "https://www.figma.com/api/mcp/asset/3cac5a89-6ff4-4fed-811e-35c32e6c2db8",
+  ],
+  [
+    "report-keilmuan-cover.png",
+    "https://www.figma.com/api/mcp/asset/b6c2ab3a-db42-48eb-9239-ee96f8cc231d",
+  ],
+  [
+    "report-pengmas-cover.png",
+    "https://www.figma.com/api/mcp/asset/2c757204-445d-4b7c-a3c5-de629ee5ba46",
+  ],
+  [
+    "report-kaderisasi-cover.png",
+    "https://www.figma.com/api/mcp/asset/435b297b-ddca-4205-801b-b66ed7873eeb",
+  ],
+  [
+    "report-media-cover.png",
+    "https://www.figma.com/api/mcp/asset/f24efb33-f0d2-43b2-80a8-effeb0341fd3",
+  ],
+  [
+    "report-inventaris-cover.png",
+    "https://www.figma.com/api/mcp/asset/5353a406-0ea0-4ee0-b78d-8111645ba593",
+  ],
+  [
+    "report-seminar-cover.png",
+    "https://www.figma.com/api/mcp/asset/7d35d593-9d99-4a92-8ecd-a4255f4ee2ff",
+  ],
+  [
+    "report-inline-field.png",
+    "https://www.figma.com/api/mcp/asset/807169a0-677e-432d-80ce-8c2a5856d0e0",
+  ],
+  [
+    "report-related-waste.png",
+    "https://www.figma.com/api/mcp/asset/9adc0d1f-ac49-40e0-a1b8-63af2a6b3fa9",
+  ],
+  [
+    "report-related-solar.png",
+    "https://www.figma.com/api/mcp/asset/e75cdcee-a44c-44e0-ad3a-2ae94fcec063",
+  ],
+  [
+    "report-related-digital.png",
+    "https://www.figma.com/api/mcp/asset/4922792c-4b31-4a7b-8b22-6f177957c8e8",
+  ],
+  [
+    "contact-brand-showcase.png",
+    "https://www.figma.com/api/mcp/asset/077b5ec7-5373-45d5-aeae-550af542dff0",
+  ],
+  [
+    "contact-paper-texture.png",
+    "https://www.figma.com/api/mcp/asset/5baa498b-223c-48de-b65e-b1e02ffbd661",
+  ],
+  [
+    "contact-showcase-bg.png",
+    "https://www.figma.com/api/mcp/asset/fbd89215-5d40-4a76-8ded-cf550a129743",
+  ],
+  [
+    "contact-logo-mark.png",
+    "https://www.figma.com/api/mcp/asset/5c6ef4ac-3365-4ec5-8270-3469ffc87252",
+  ],
+  [
+    "contact-social-instagram.svg",
+    "https://www.figma.com/api/mcp/asset/df6b7674-d06e-4740-aa9a-015c1c4ab515",
+  ],
+  [
+    "contact-social-linkedin.svg",
+    "https://www.figma.com/api/mcp/asset/965ae78a-8d9a-419b-a3e4-ce531ae93dfd",
+  ],
+  [
+    "contact-social-youtube.svg",
+    "https://www.figma.com/api/mcp/asset/c9960394-fcb5-4a28-9999-57f58c22bc8a",
+  ],
+  [
+    "contact-social-x.svg",
+    "https://www.figma.com/api/mcp/asset/6ee7452c-bd35-4b0a-be5f-3297f2534f0e",
+  ],
+  [
+    "icon-drive-banner.png",
+    "https://www.figma.com/api/mcp/asset/4b9704fe-e35f-4277-9494-6ed0e37fd925",
+  ],
+  [
+    "icon-arrow-cream.svg",
+    "https://www.figma.com/api/mcp/asset/de632c12-cdb4-4065-85aa-47696f60c469",
+  ],
+  [
+    "icon-arrow-ink.svg",
+    "https://www.figma.com/api/mcp/asset/f106f770-7a6c-4737-a922-dfceb7433017",
+  ],
+  [
+    "icon-arrow-muted.svg",
+    "https://www.figma.com/api/mcp/asset/30c0be65-6db3-446f-9bad-ca7b30763b70",
+  ],
+  [
+    "footer-icon-share.svg",
+    "https://www.figma.com/api/mcp/asset/ec320f04-ae14-4549-9ac6-4cc66dc826b2",
+  ],
+  [
+    "footer-icon-mail.svg",
+    "https://www.figma.com/api/mcp/asset/d84acf55-2989-42a4-b2c6-db5d2d2a055a",
+  ],
+  [
+    "footer-icon-phone.svg",
+    "https://www.figma.com/api/mcp/asset/8867b0cc-91ef-46ea-a4b8-58a127804241",
+  ],
+  [
+    "social-instagram.png",
+    "https://www.figma.com/api/mcp/asset/19181745-9ef1-40a3-b6cf-75d2b978fc40",
+  ],
+  [
+    "social-linkedin.png",
+    "https://www.figma.com/api/mcp/asset/67980252-ca16-4a8d-ba26-b91c4cc29a4a",
+  ],
+  [
+    "social-youtube.png",
+    "https://www.figma.com/api/mcp/asset/37d7fec7-7e78-462a-aab7-9146398625d6",
+  ],
+  [
+    "social-x.png",
+    "https://www.figma.com/api/mcp/asset/3d143e87-b8b8-4e67-96c9-ede45aef3f62",
+  ],
+];
+
+async function downloadAsset(filename, url) {
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to download ${filename}: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+  await writeFile(path.join(outputDir, filename), Buffer.from(arrayBuffer));
+  console.log(`saved ${filename}`);
+}
+
+async function main() {
+  await mkdir(outputDir, { recursive: true });
+
+  for (const [filename, url] of assets) {
+    await downloadAsset(filename, url);
+  }
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

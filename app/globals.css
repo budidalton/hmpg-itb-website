@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-brand-cream: #f9f0de;
+  --color-brand-sand: #ebe2d0;
+  --color-brand-surface: #fff8f0;
+  --color-brand-shell: #f6eddb;
+  --color-brand-blush: #ffdad6;
+  --color-brand-gold: #fde089;
+  --color-brand-maroon: #831618;
+  --color-brand-maroon-dark: #712224;
+  --color-brand-wine: #5d1c1e;
+  --color-brand-ink: #1f1b10;
+  --color-brand-body: #58413f;
+  --color-brand-muted: #dfbfbc;
+  --color-brand-stroke: #8c716e;
+  --font-sans: var(--font-manrope);
+  --font-manrope: var(--font-manrope);
+  --font-epilogue: var(--font-epilogue);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #fff8f0;
+  color: #1f1b10;
+  font-family: var(--font-manrope), sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+.editorial-shell {
+  background-image:
+    radial-gradient(
+      circle at top left,
+      rgba(131, 22, 24, 0.04),
+      transparent 24rem
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 248, 240, 0.98),
+      rgba(255, 248, 240, 0.98)
+    );
+}
+
+.rich-text {
+  color: #58413f;
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+
+.rich-text h2 {
+  margin: 2.75rem 0 1rem;
+  color: #1f1b10;
+  font-family: var(--font-epilogue), sans-serif;
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+.rich-text p,
+.rich-text li {
+  margin: 0 0 1.2rem;
+}
+
+.rich-text ol,
+.rich-text ul {
+  margin: 1rem 0 1.5rem;
+  padding-left: 1.5rem;
+}
+
+.rich-text blockquote {
+  margin: 2rem 0;
+  border-bottom: 2px solid #831618;
+  background: #fcf3e0;
+  padding: 1.5rem 2rem;
+  color: #831618;
+}
+
+.rich-text blockquote p {
+  margin-bottom: 0.75rem;
+  font-family: var(--font-epilogue), sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.rich-text blockquote cite {
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.rich-text figure {
+  margin: 2rem 0;
+}
+
+.rich-text figcaption {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.rich-text a {
+  color: #831618;
+  text-decoration: underline;
+  text-underline-offset: 0.22em;
+}
