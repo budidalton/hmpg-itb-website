@@ -66,7 +66,7 @@ export default async function HomePage() {
           <div className="absolute inset-0 overflow-hidden">
             <div
               aria-hidden="true"
-              className="absolute inset-[-60%_-14%] scale-[0.8] translate-y-[-12%] -rotate-[2.33deg] bg-cover bg-center bg-no-repeat"
+              className="absolute inset-[-60%_-14%] translate-y-[-12%] scale-[0.8] -rotate-[2.33deg] bg-cover bg-center bg-no-repeat"
               style={{ backgroundImage: `url(${home.summaryTextureSrc})` }}
             />
             <div className="absolute inset-0 bg-[rgba(113,34,36,0.65)]" />
