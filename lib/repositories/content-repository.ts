@@ -1,0 +1,460 @@
+import { createClient } from "@supabase/supabase-js";
+
+import { seedStore } from "@/lib/data/seed";
+import type {
+  ActivityHighlight,
+  CmsStore,
+  PageContent,
+  PageContentKey,
+  PageContentMap,
+  ReportFilters,
+  ReportRecord,
+  SiteSettings,
+} from "@/lib/data/types";
+import { slugify } from "@/lib/utils";
+
+function cloneStore(): CmsStore {
+  return JSON.parse(JSON.stringify(seedStore)) as CmsStore;
+}
+
+let demoStore = cloneStore();
+
+type PageContentRow<Key extends PageContentKey = PageContentKey> = {
+  key: Key;
+  value: PageContent<Key>;
+};
+
+function getPageContentValue<Key extends PageContentKey>(
+  rows: PageContentRow[] | null,
+  key: Key,
+  fallback: PageContent<Key>,
+): PageContent<Key> {
+  if (!rows) {
+    return fallback;
+  }
+
+  const match = rows.find(
+    (entry): entry is PageContentRow<Key> => entry.key === key,
+  );
+  return match?.value ?? fallback;
+}
+
+function buildReportRecord(
+  base: Omit<ReportRecord, "cardImageSrc" | "coverCaption" | "summaryLabel">,
+  optional: {
+    cardImageSrc: string | undefined;
+    coverCaption: string | undefined;
+    summaryLabel: string | undefined;
+  },
+): ReportRecord {
+  return {
+    ...base,
+    ...(optional.cardImageSrc ? { cardImageSrc: optional.cardImageSrc } : {}),
+    ...(optional.coverCaption ? { coverCaption: optional.coverCaption } : {}),
+    ...(optional.summaryLabel ? { summaryLabel: optional.summaryLabel } : {}),
+  };
+}
+
+function hasSupabaseConfig() {
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.SUPABASE_SERVICE_ROLE_KEY &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  );
+}
+
+function getAdminSupabaseClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !key) {
+    throw new Error("Supabase admin environment variables are not configured.");
+  }
+
+  return createClient(url, key, {
+    auth: { persistSession: false },
+  });
+}
+
+export function isDemoMode() {
+  return !hasSupabaseConfig();
+}
+
+export async function getStore() {
+  if (isDemoMode()) {
+    return demoStore;
+  }
+
+  const supabase = getAdminSupabaseClient();
+  const [settingsResult, pagesResult, activitiesResult, reportsResult] =
+    await Promise.all([
+      supabase.from("site_settings").select("*").single(),
+      supabase.from("page_content").select("*"),
+      supabase.from("activity_highlights").select("*").order("id"),
+      supabase
+        .from("reports")
+        .select("*")
+        .order("published_at", { ascending: false }),
+    ]);
+
+  const settings = settingsResult.data as SiteSettings | null;
+  const pageRows = pagesResult.data as PageContentRow[] | null;
+  const activities =
+    (activitiesResult.data as ActivityHighlight[] | null) ?? [];
+  const reports = ((reportsResult.data as unknown[]) ?? []).map((row) =>
+    fromSupabaseReportRow(row),
+  );
+  const pages: PageContentMap = {
+    home: getPageContentValue(pageRows, "home", seedStore.pages.home),
+    about: getPageContentValue(pageRows, "about", seedStore.pages.about),
+    reports: getPageContentValue(pageRows, "reports", seedStore.pages.reports),
+    contact: getPageContentValue(pageRows, "contact", seedStore.pages.contact),
+  };
+
+  return {
+    settings: settings ?? seedStore.settings,
+    pages,
+    activities: activities.length > 0 ? activities : seedStore.activities,
+    reports: reports.length > 0 ? reports : seedStore.reports,
+  } satisfies CmsStore;
+}
+
+function fromSupabaseReportRow(row: unknown): ReportRecord {
+  const value = row as Record<string, unknown>;
+
+  return buildReportRecord(
+    {
+      id: String(value.id),
+      slug: String(value.slug),
+      title: String(value.title),
+      excerpt: String(value.excerpt),
+      category: String(value.category),
+      categoryLabel: String(value.category_label),
+      coverImageSrc: String(value.cover_image_src),
+      publishedAt: String(value.published_at),
+      year: String(value.year),
+      periodLabel: String(value.period_label),
+      editionLabel: String(value.edition_label),
+      author: String(value.author),
+      status: (value.status as ReportRecord["status"]) ?? "draft",
+      featured: Boolean(value.featured),
+      bodyHtml: String(value.body_html),
+      relatedSlugs: Array.isArray(value.related_slugs)
+        ? value.related_slugs.map((item) => String(item))
+        : [],
+    },
+    {
+      cardImageSrc:
+        typeof value.card_image_src === "string"
+          ? value.card_image_src
+          : undefined,
+      coverCaption:
+        typeof value.cover_caption === "string"
+          ? value.cover_caption
+          : undefined,
+      summaryLabel:
+        typeof value.summary_label === "string"
+          ? value.summary_label
+          : undefined,
+    },
+  );
+}
+
+export async function getPublishedReports(filters: ReportFilters = {}) {
+  const store = await getStore();
+
+  return filterReports(
+    store.reports.filter((report) => report.status === "published"),
+    filters,
+  );
+}
+
+export function filterReports(reports: ReportRecord[], filters: ReportFilters) {
+  return reports.filter((report) => {
+    if (
+      filters.year &&
+      filters.year !== "all" &&
+      report.year !== filters.year
+    ) {
+      return false;
+    }
+
+    if (
+      filters.period &&
+      filters.period !== "all" &&
+      report.periodLabel !== filters.period &&
+      report.editionLabel !== filters.period
+    ) {
+      return false;
+    }
+
+    if (
+      filters.category &&
+      filters.category !== "all" &&
+      report.category !== filters.category
+    ) {
+      return false;
+    }
+
+    if (
+      filters.status &&
+      filters.status !== "all" &&
+      report.status !== filters.status
+    ) {
+      return false;
+    }
+
+    if (filters.query) {
+      const normalizedQuery = filters.query.toLowerCase();
+      const haystack = [
+        report.title,
+        report.excerpt,
+        report.categoryLabel,
+        report.editionLabel,
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(normalizedQuery);
+    }
+
+    return true;
+  });
+}
+
+export async function getReportBySlug(slug: string) {
+  const store = await getStore();
+  return store.reports.find((report) => report.slug === slug) ?? null;
+}
+
+export async function getRelatedReports(slug: string) {
+  const store = await getStore();
+  const report = store.reports.find((entry) => entry.slug === slug);
+
+  if (!report) {
+    return [];
+  }
+
+  const manual = report.relatedSlugs
+    .map((relatedSlug) =>
+      store.reports.find((entry) => entry.slug === relatedSlug),
+    )
+    .filter((entry): entry is ReportRecord => Boolean(entry));
+
+  if (manual.length >= 3) {
+    return manual.slice(0, 3);
+  }
+
+  const fallback = store.reports.filter(
+    (entry) => entry.slug !== slug && entry.category === report.category,
+  );
+
+  return [...manual, ...fallback].slice(0, 3);
+}
+
+export async function saveSettings(nextSettings: SiteSettings) {
+  if (isDemoMode()) {
+    demoStore = { ...demoStore, settings: nextSettings };
+    return nextSettings;
+  }
+
+  const supabase = getAdminSupabaseClient();
+  const result = await supabase
+    .from("site_settings")
+    .upsert({ id: 1, ...nextSettings })
+    .select("*")
+    .single();
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  return result.data as SiteSettings;
+}
+
+export async function savePageContent<Key extends PageContentKey>(
+  key: Key,
+  value: PageContent<Key>,
+) {
+  if (isDemoMode()) {
+    demoStore = {
+      ...demoStore,
+      pages: {
+        ...demoStore.pages,
+        [key]: value,
+      },
+    };
+
+    return value;
+  }
+
+  const supabase = getAdminSupabaseClient();
+  const result = await supabase
+    .from("page_content")
+    .upsert({ key, value }, { onConflict: "key" })
+    .select("*")
+    .single();
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  return result.data.value as PageContent<Key>;
+}
+
+export async function saveActivities(activities: ActivityHighlight[]) {
+  if (isDemoMode()) {
+    demoStore = { ...demoStore, activities };
+    return activities;
+  }
+
+  const supabase = getAdminSupabaseClient();
+  const result = await supabase
+    .from("activity_highlights")
+    .upsert(activities)
+    .select("*");
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  return result.data as ActivityHighlight[];
+}
+
+export async function saveReport(
+  input: Partial<ReportRecord> & Pick<ReportRecord, "title">,
+) {
+  const store = await getStore();
+  const existing = input.id
+    ? store.reports.find((report) => report.id === input.id)
+    : undefined;
+  const slug = input.slug ? slugify(input.slug) : slugify(input.title);
+
+  const report = buildReportRecord(
+    {
+      id: existing?.id ?? `report-${Date.now()}`,
+      slug,
+      title: input.title,
+      excerpt: input.excerpt ?? existing?.excerpt ?? "",
+      category: input.category ?? existing?.category ?? "editorial",
+      categoryLabel:
+        input.categoryLabel ?? existing?.categoryLabel ?? "Editorial",
+      coverImageSrc: input.coverImageSrc ?? existing?.coverImageSrc ?? "",
+      publishedAt:
+        input.publishedAt ?? existing?.publishedAt ?? new Date().toISOString(),
+      year: input.year ?? existing?.year ?? new Date().getFullYear().toString(),
+      periodLabel:
+        input.periodLabel ?? existing?.periodLabel ?? "Periode Aktif",
+      editionLabel:
+        input.editionLabel ?? existing?.editionLabel ?? "HMPG Report",
+      author: input.author ?? existing?.author ?? "HMPG ITB",
+      status: input.status ?? existing?.status ?? "draft",
+      featured: input.featured ?? existing?.featured ?? false,
+      bodyHtml:
+        input.bodyHtml ??
+        existing?.bodyHtml ??
+        "<section><h2>Draft</h2><p>Isi laporan.</p></section>",
+      relatedSlugs: input.relatedSlugs ?? existing?.relatedSlugs ?? [],
+    },
+    {
+      cardImageSrc: input.cardImageSrc ?? existing?.cardImageSrc,
+      coverCaption: input.coverCaption ?? existing?.coverCaption,
+      summaryLabel: input.summaryLabel ?? existing?.summaryLabel,
+    },
+  );
+
+  if (isDemoMode()) {
+    demoStore = {
+      ...demoStore,
+      reports: [
+        ...demoStore.reports.filter((entry) => entry.id !== report.id),
+        report,
+      ],
+    };
+
+    return report;
+  }
+
+  const supabase = getAdminSupabaseClient();
+  const result = await supabase
+    .from("reports")
+    .upsert(
+      {
+        id: report.id,
+        slug: report.slug,
+        title: report.title,
+        excerpt: report.excerpt,
+        category: report.category,
+        category_label: report.categoryLabel,
+        cover_image_src: report.coverImageSrc,
+        card_image_src: report.cardImageSrc,
+        cover_caption: report.coverCaption,
+        published_at: report.publishedAt,
+        year: report.year,
+        period_label: report.periodLabel,
+        edition_label: report.editionLabel,
+        author: report.author,
+        status: report.status,
+        featured: report.featured,
+        summary_label: report.summaryLabel,
+        body_html: report.bodyHtml,
+        related_slugs: report.relatedSlugs,
+      },
+      { onConflict: "id" },
+    )
+    .select("*")
+    .single();
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  return fromSupabaseReportRow(result.data);
+}
+
+export async function deleteReport(id: string) {
+  if (isDemoMode()) {
+    demoStore = {
+      ...demoStore,
+      reports: demoStore.reports.filter((report) => report.id !== id),
+    };
+
+    return;
+  }
+
+  const supabase = getAdminSupabaseClient();
+  const result = await supabase.from("reports").delete().eq("id", id);
+
+  if (result.error) {
+    throw result.error;
+  }
+}
+
+export async function uploadAsset(file: File, folder: string) {
+  const safeName = `${Date.now()}-${file.name.replace(/\s+/g, "-").toLowerCase()}`;
+
+  if (isDemoMode()) {
+    const buffer = Buffer.from(await file.arrayBuffer());
+    return `data:${file.type};base64,${buffer.toString("base64")}`;
+  }
+
+  const supabase = getAdminSupabaseClient();
+  const path = `${folder}/${safeName}`;
+  const uploadResult = await supabase.storage
+    .from(folder.startsWith("report") ? "report-media" : "site-assets")
+    .upload(path, file, {
+      cacheControl: "3600",
+      upsert: true,
+      contentType: file.type,
+    });
+
+  if (uploadResult.error) {
+    throw uploadResult.error;
+  }
+
+  const publicUrl = supabase.storage
+    .from(folder.startsWith("report") ? "report-media" : "site-assets")
+    .getPublicUrl(path);
+
+  return publicUrl.data.publicUrl;
+}
