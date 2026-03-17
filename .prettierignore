@@ -1,0 +1,7 @@
+.next
+coverage
+my-app
+node_modules
+playwright-report
+test-results
+tmp-hmpg-web
