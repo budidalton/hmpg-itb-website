@@ -27,12 +27,14 @@ create table if not exists public.site_settings (
   address_lines text[] not null default '{}',
   footer_address_lines text[] not null default '{}',
   email text not null,
-  phone text not null,
   drive_akademik_url text not null,
   footer_copyright text not null,
   social_links jsonb not null default '[]'::jsonb,
   updated_at timestamptz not null default now()
 );
+
+alter table public.site_settings
+drop column if exists phone;
 
 create table if not exists public.page_content (
   key text primary key check (key in ('home', 'about', 'reports', 'contact')),

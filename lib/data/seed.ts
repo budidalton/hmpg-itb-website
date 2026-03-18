@@ -23,7 +23,6 @@ export const seedSettings: SiteSettings = {
     "Kab. Sumedang, Jawa Barat 45363.",
   ],
   email: "hmpg_itb@km.itb.ac.id",
-  phone: "+62 22 250 1234",
   driveAkademikUrl: "https://drive.google.com/",
   footerCopyright:
     "© 2026 Himpunan Mahasiswa Teknik Pangan ITB. All rights reserved.",
@@ -52,6 +51,12 @@ export const seedSettings: SiteSettings = {
       href: "https://x.com/hmpgitb",
       handle: "@hmpgitb",
     },
+    {
+      platform: "tiktok",
+      label: "TikTok",
+      href: "https://www.tiktok.com/@hmpgitb",
+      handle: "@hmpgitb",
+    },
   ],
 };
 
@@ -60,10 +65,7 @@ export const seedPages: PageContentMap = {
     heroEyebrow: "Welcome to HMPG ITB Official Website",
     heroTitleLine1: "Himpunan Mahasiswa",
     heroTitleLine2: "Teknik Pangan ITB",
-    heroDescription:
-      // "Wadah kolaborasi dan pengembangan mahasiswa Teknik Pangan ITB dalam menjawab tantangan kedaulatan pangan berkelanjutan melalui sains dan teknologi.",
-      "",
-    heroCtaLabel: "Selengkapnya",
+    heroCtaLabel: "Learn More",
     heroImageSrc: "/assets/figma/home-hero-flag.png",
     summaryParagraphs: [
       "Himpunan Mahasiswa Teknik Pangan Institut Teknologi Bandung (HMPG ITB) didirikan pada 12 Mei 2015 sebagai organisasi yang beranggotakan mahasiswa Program Studi Teknik Pangan ITB. HMPG ITB hadir sebagai wadah untuk mengembangkan potensi, memperluas wawasan, serta membangun kebersamaan sebagai satu kesatuan. ",
@@ -72,9 +74,6 @@ export const seedPages: PageContentMap = {
   },
   about: {
     heroTitle: "About Us",
-    heroDescription:
-      // 'Mengenal HMPG ITB melalui sejarah singkat, nilai, identitas visual, serta visi dan misi BP "Polaris" HMPG ITB 2026/2027.',
-      "",
     heroImageSrc: "/assets/figma/about-hero-edited.png",
     historyEyebrow: "Our Journey",
     historyTitle: "The steps that shaped HMPG ITB into what it is today.",
@@ -106,9 +105,6 @@ export const seedPages: PageContentMap = {
       "Explore the stories, milestones, and journey that define HMPG ITB.",
     heroImageSrc: "/assets/figma/reports-hero-edited.png",
     driveTitle: "HMPG ITB Member’s Archives",
-    driveDescription:
-      // "Akses bank soal, materi kuliah, dan jurnal teknis pangan dalam satu pintu.",
-      "",
     driveCtaLabel: "Open Archive Folder",
     featuredReportSlug: "evaluasi-strategis-pencapaian-tahunan-hmpg-itb",
   },

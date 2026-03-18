@@ -65,14 +65,11 @@ export default async function AboutPage() {
           </div>
           <div className="absolute inset-0 bg-[rgba(113,34,36,0.6)]" />
 
-          <div className="relative h-full w-full px-6 pt-[112px] sm:px-8 lg:px-12">
+          <div className="relative mx-auto flex h-full w-full max-w-[1280px] items-center px-6 sm:px-8 lg:px-12">
             <div className="max-w-[744px] text-white">
               <h1 className="font-epilogue w-full max-w-[505px] text-[3.5rem] leading-[0.95] font-extrabold md:text-[72px] md:leading-[96px]">
                 {about.heroTitle}
               </h1>
-              <p className="font-manrope mt-4 w-full max-w-[707px] text-lg leading-8 text-white/90 md:text-[24px] md:leading-8">
-                {about.heroDescription}
-              </p>
             </div>
           </div>
         </section>

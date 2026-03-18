@@ -56,7 +56,6 @@ function fromSupabaseSettingsRow(row: unknown): SiteSettings {
       ? value.footer_address_lines.map((item) => String(item))
       : [],
     email: String(value.email),
-    phone: String(value.phone),
     driveAkademikUrl: String(value.drive_akademik_url),
     footerCopyright: String(value.footer_copyright),
     socialLinks: Array.isArray(value.social_links)

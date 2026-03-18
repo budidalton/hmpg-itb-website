@@ -33,7 +33,6 @@ export async function saveSettingsAction(formData: FormData) {
   const nextSettings: SiteSettings = {
     ...store.settings,
     email: String(formData.get("email") ?? store.settings.email),
-    phone: String(formData.get("phone") ?? store.settings.phone),
     driveAkademikUrl: String(
       formData.get("driveAkademikUrl") ?? store.settings.driveAkademikUrl,
     ),
@@ -57,9 +56,6 @@ export async function saveHomeContentAction(formData: FormData) {
     ),
     heroTitleLine2: String(
       formData.get("heroTitleLine2") ?? store.pages.home.heroTitleLine2,
-    ),
-    heroDescription: String(
-      formData.get("heroDescription") ?? store.pages.home.heroDescription,
     ),
     heroCtaLabel: String(
       formData.get("heroCtaLabel") ?? store.pages.home.heroCtaLabel,
@@ -109,9 +105,6 @@ export async function saveAboutContentAction(formData: FormData) {
   const nextAbout: AboutPageContent = {
     ...store.pages.about,
     heroTitle: String(formData.get("heroTitle") ?? store.pages.about.heroTitle),
-    heroDescription: String(
-      formData.get("heroDescription") ?? store.pages.about.heroDescription,
-    ),
     historyEyebrow: String(
       formData.get("historyEyebrow") ?? store.pages.about.historyEyebrow,
     ),
@@ -163,9 +156,6 @@ export async function saveReportsContentAction(formData: FormData) {
     ),
     driveTitle: String(
       formData.get("driveTitle") ?? store.pages.reports.driveTitle,
-    ),
-    driveDescription: String(
-      formData.get("driveDescription") ?? store.pages.reports.driveDescription,
     ),
     driveCtaLabel: String(
       formData.get("driveCtaLabel") ?? store.pages.reports.driveCtaLabel,

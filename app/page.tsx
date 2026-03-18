@@ -36,13 +36,7 @@ export default async function HomePage() {
                 <p className="text-[#a42f2c]">{home.heroTitleLine2}</p>
               </div>
 
-              <div className="max-w-[576px] pt-[7.25px]">
-                <p className="font-manrope text-[18px] leading-[29.25px] text-[#58413f]">
-                  {home.heroDescription}
-                </p>
-              </div>
-
-              <div className="pt-6">
+              <div className="pt-3">
                 <Link
                   className="group inline-flex items-center gap-2 rounded-[2px] bg-[#831618] px-10 pt-[16.5px] pb-[17px] text-white transition duration-300 hover:bg-[#712224]"
                   href="/about-us"

@@ -253,10 +253,6 @@ const assets = [
     "https://www.figma.com/api/mcp/asset/d84acf55-2989-42a4-b2c6-db5d2d2a055a",
   ],
   [
-    "footer-icon-phone.svg",
-    "https://www.figma.com/api/mcp/asset/8867b0cc-91ef-46ea-a4b8-58a127804241",
-  ],
-  [
     "social-instagram.png",
     "https://www.figma.com/api/mcp/asset/19181745-9ef1-40a3-b6cf-75d2b978fc40",
   ],

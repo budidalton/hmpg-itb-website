@@ -23,7 +23,6 @@ export default async function DashboardContentPage() {
         title="Global Settings"
       >
         <Field label="Email" name="email" value={store.settings.email} />
-        <Field label="Phone" name="phone" value={store.settings.phone} />
         <Field
           label="Drive Akademik URL"
           name="driveAkademikUrl"
@@ -60,11 +59,6 @@ export default async function DashboardContentPage() {
           label="Hero title line 2"
           name="heroTitleLine2"
           value={store.pages.home.heroTitleLine2}
-        />
-        <TextareaField
-          label="Hero description"
-          name="heroDescription"
-          value={store.pages.home.heroDescription}
         />
         <Field
           label="Hero CTA label"
@@ -138,11 +132,6 @@ export default async function DashboardContentPage() {
           label="Hero title"
           name="heroTitle"
           value={store.pages.about.heroTitle}
-        />
-        <TextareaField
-          label="Hero description"
-          name="heroDescription"
-          value={store.pages.about.heroDescription}
         />
         <Field
           label="History eyebrow"
@@ -230,11 +219,6 @@ export default async function DashboardContentPage() {
           label="Drive title"
           name="driveTitle"
           value={store.pages.reports.driveTitle}
-        />
-        <TextareaField
-          label="Drive description"
-          name="driveDescription"
-          value={store.pages.reports.driveDescription}
         />
         <Field
           label="Drive CTA label"

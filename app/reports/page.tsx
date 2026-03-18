@@ -18,6 +18,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
   const params = await searchParams;
   const store = await getStore();
   const reportsPage = store.pages.reports;
+  const hasHeroDescription = Boolean(reportsPage.heroDescription.trim());
   const query = typeof params.query === "string" ? params.query : "";
   const year = typeof params.year === "string" ? params.year : "all";
   const category =
@@ -90,7 +91,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
           <div className="bg-brand-maroon-dark/70 absolute inset-0" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.06),transparent_42%)] opacity-50" />
 
-          <div className="relative mx-auto flex h-full w-full max-w-[1280px] items-center px-6 pt-8 sm:px-10 lg:px-24">
+          <div className="relative mx-auto flex h-full w-full max-w-[1280px] items-center px-6 pt-8 sm:px-8 lg:px-12">
             <div className="max-w-[42rem] text-white">
               <h1 className="font-epilogue text-[3.25rem] leading-[0.95] font-extrabold tracking-[-0.04em] sm:text-[4.3rem] lg:text-[4.5rem]">
                 {reportsPage.heroTitle.split(" & ").map((part, index) => (
@@ -100,9 +101,11 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                 ))}
               </h1>
 
-              <p className="font-manrope mt-7 max-w-[38rem] text-lg leading-[1.65] text-white/90 lg:text-xl">
-                {reportsPage.heroDescription}
-              </p>
+              {hasHeroDescription ? (
+                <p className="font-manrope mt-7 max-w-[38rem] text-lg leading-[1.65] text-white/90 lg:text-xl">
+                  {reportsPage.heroDescription}
+                </p>
+              ) : null}
             </div>
           </div>
         </section>
@@ -113,7 +116,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
               className="bg-brand-sand relative z-20 -mt-3 flex flex-col justify-between gap-6 border border-[rgba(140,113,110,0.08)] p-2 shadow-[0_5px_18px_rgba(0,0,0,0.3)] md:-mt-5 md:flex-row md:items-center"
               id="drive-akademik"
             >
-              <div className="flex items-center gap-6 p-4 md:p-6">
+              <div className="flex min-h-16 items-center gap-6 p-4 md:p-6">
                 <div className="bg-brand-surface flex h-16 w-16 items-center justify-center shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
                   <img
                     alt=""
@@ -123,12 +126,9 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                   />
                 </div>
 
-                <div className="max-w-[29rem]">
+                <div className="flex min-h-16 max-w-[29rem] items-center">
                   <p className="font-epilogue text-[24px] font-bold tracking-[-0.03em] text-[#1f1b10]">
                     {reportsPage.driveTitle}
-                  </p>
-                  <p className="font-manrope mt-1 text-sm leading-5 text-[#58413f]">
-                    {reportsPage.driveDescription}
                   </p>
                 </div>
               </div>

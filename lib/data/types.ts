@@ -1,6 +1,11 @@
 export type PageContentKey = "home" | "about" | "reports" | "contact";
 
-export type SocialPlatform = "instagram" | "linkedin" | "youtube" | "x";
+export type SocialPlatform =
+  | "instagram"
+  | "linkedin"
+  | "youtube"
+  | "x"
+  | "tiktok";
 
 export type ReportStatus = "draft" | "published";
 
@@ -20,7 +25,6 @@ export interface SiteSettings {
   addressLines: string[];
   footerAddressLines: string[];
   email: string;
-  phone: string;
   driveAkademikUrl: string;
   footerCopyright: string;
   socialLinks: SocialLink[];
@@ -30,7 +34,6 @@ export interface HomePageContent {
   heroEyebrow: string;
   heroTitleLine1: string;
   heroTitleLine2: string;
-  heroDescription: string;
   heroCtaLabel: string;
   heroImageSrc: string;
   summaryParagraphs: string[];
@@ -49,7 +52,6 @@ export interface ActivityHighlight {
 
 export interface AboutPageContent {
   heroTitle: string;
-  heroDescription: string;
   heroImageSrc: string;
   historyEyebrow: string;
   historyTitle: string;
@@ -69,7 +71,6 @@ export interface ReportsPageContent {
   heroDescription: string;
   heroImageSrc: string;
   driveTitle: string;
-  driveDescription: string;
   driveCtaLabel: string;
   featuredReportSlug: string;
 }

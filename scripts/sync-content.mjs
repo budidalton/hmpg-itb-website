@@ -61,23 +61,48 @@ function buildReportRows() {
 }
 
 async function syncSettings(supabase) {
+  const phoneProbe = await supabase
+    .from("site_settings")
+    .select("phone")
+    .limit(1);
+  const hasLegacyPhoneColumn = !phoneProbe.error;
+  const currentSettings = await supabase
+    .from("site_settings")
+    .select("*")
+    .eq("id", 1)
+    .maybeSingle();
+
+  if (currentSettings.error) {
+    throw currentSettings.error;
+  }
+
+  const payload = {
+    id: 1,
+    organization_name: seedSettings.organizationName,
+    short_name: seedSettings.shortName,
+    tagline: seedSettings.tagline,
+    logo_src: seedSettings.logoSrc,
+    footer_logo_src: seedSettings.footerLogoSrc,
+    address_lines: seedSettings.addressLines,
+    footer_address_lines: seedSettings.footerAddressLines,
+    email: seedSettings.email,
+    drive_akademik_url: seedSettings.driveAkademikUrl,
+    footer_copyright: seedSettings.footerCopyright,
+    social_links: seedSettings.socialLinks,
+    ...(hasLegacyPhoneColumn
+      ? {
+          phone:
+            currentSettings.data &&
+            typeof currentSettings.data.phone === "string"
+              ? currentSettings.data.phone
+              : "",
+        }
+      : {}),
+  };
+
   const result = await supabase
     .from("site_settings")
-    .upsert({
-      id: 1,
-      organization_name: seedSettings.organizationName,
-      short_name: seedSettings.shortName,
-      tagline: seedSettings.tagline,
-      logo_src: seedSettings.logoSrc,
-      footer_logo_src: seedSettings.footerLogoSrc,
-      address_lines: seedSettings.addressLines,
-      footer_address_lines: seedSettings.footerAddressLines,
-      email: seedSettings.email,
-      phone: seedSettings.phone,
-      drive_akademik_url: seedSettings.driveAkademikUrl,
-      footer_copyright: seedSettings.footerCopyright,
-      social_links: seedSettings.socialLinks,
-    })
+    .upsert(payload)
     .select("id")
     .single();
 

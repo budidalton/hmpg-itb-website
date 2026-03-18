@@ -5,14 +5,14 @@ import type { SiteSettings } from "@/lib/data/types";
 
 const footerLinks = {
   primary: [
-    { href: "/", label: "Beranda" },
-    { href: "/about-us", label: "Profil" },
+    { href: "/", label: "Home" },
+    { href: "/about-us", label: "About Us" },
     { href: "/reports", label: "Reports" },
   ],
   secondary: [
-    { href: "/reports#drive-akademik", label: "Drive Akademik" },
-    { href: "/contact-us", label: "Kontak" },
-    { href: "/dashboard/login", label: "Halaman Admin" },
+    { href: "/reports#drive-akademik", label: "HMPG's Archive" },
+    { href: "/contact-us", label: "Contact Us" },
+    { href: "/dashboard/login", label: "CMS" },
   ],
 } satisfies {
   primary: { href: Route; label: string }[];
@@ -25,18 +25,20 @@ export function SiteFooter({ settings }: { settings: SiteSettings }) {
       href:
         settings.socialLinks.find((link) => link.platform === "instagram")
           ?.href ?? settings.driveAkademikUrl,
-      iconSrc: "/assets/figma/footer-icon-share.svg",
-      label: "Media sosial HMPG ITB",
+      iconSrc: "/assets/figma/footer-icon-instagram.svg",
+      label: "Instagram HMPG ITB",
+    },
+    {
+      href:
+        settings.socialLinks.find((link) => link.platform === "linkedin")
+          ?.href ?? "#",
+      iconSrc: "/assets/figma/footer-icon-linkedin.svg",
+      label: "LinkedIn HMPG ITB",
     },
     {
       href: `mailto:${settings.email}`,
       iconSrc: "/assets/figma/footer-icon-mail.svg",
       label: "Email HMPG ITB",
-    },
-    {
-      href: `tel:${settings.phone.replace(/\s+/g, "")}`,
-      iconSrc: "/assets/figma/footer-icon-phone.svg",
-      label: "Telepon HMPG ITB",
     },
   ] as const;
 
@@ -84,17 +86,17 @@ export function SiteFooter({ settings }: { settings: SiteSettings }) {
           <FooterColumn
             className="lg:col-span-2"
             items={footerLinks.primary}
-            title="Navigasi"
+            title="Navigation"
           />
           <FooterColumn
             className="lg:col-span-2"
             items={footerLinks.secondary}
-            title="Navigasi"
+            title="Resources"
           />
           <SocialFooterColumn
             className="lg:col-span-2"
             items={settings.socialLinks}
-            title="Media Sosial"
+            title="Social Media"
           />
         </div>
 

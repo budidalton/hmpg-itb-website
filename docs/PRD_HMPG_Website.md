@@ -54,7 +54,7 @@ Based on charter feature IDs:
   - K-2: HMPG Reports index by edition/period.
   - K-3: HMPG Report article detail page.
 - Contact Us
-  - C-1: Showing email, address, and phone number.
+  - C-1: Showing email and address.
   - C-2: Showing HMPG's social media
 - Dashboard
   - D-1: Email/password authentication + password reset.
@@ -96,7 +96,7 @@ Based on charter feature IDs:
 
 ### FR-5 Contact Us page
 
-- The system must display HMPG's phone number, address, and email.
+- The system must display HMPG's address and email.
 - The system must display HMPG's social media.
 
 ### FR-6 Authentication and admin access
