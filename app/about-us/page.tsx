@@ -1,23 +1,11 @@
+import { FireIcon, TrophyIcon, UsersIcon } from "@heroicons/react/24/solid";
 import type { Route } from "next";
 
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { getStore } from "@/lib/repositories/content-repository";
 
-const valueAssets = [
-  {
-    src: "/assets/figma/about-value-integritas.svg",
-    className: "h-[21px] w-[22px]",
-  },
-  {
-    src: "/assets/figma/about-value-sinergi.svg",
-    className: "h-4 w-[22px]",
-  },
-  {
-    src: "/assets/figma/about-value-inovasi.svg",
-    className: "h-5 w-[15px]",
-  },
-] as const;
+const valueIcons = [UsersIcon, TrophyIcon, FireIcon] as const;
 
 const colorSwatches = [
   {
@@ -156,20 +144,18 @@ export default async function AboutPage() {
                   </p>
                   <div className="flex flex-1 flex-wrap items-center justify-between gap-x-8 gap-y-4 md:pr-8 lg:pr-16">
                     {about.values.map((value, index) => {
-                      const asset = valueAssets[index % valueAssets.length]!;
+                      const Icon = valueIcons[index % valueIcons.length]!;
 
                       return (
                         <div
-                          className="flex shrink-0 items-center gap-[11.99px]"
+                          className="flex shrink-0 items-center gap-3"
                           key={value}
                         >
-                          <img
-                            alt=""
+                          <Icon
                             aria-hidden="true"
-                            className={`${asset.className} object-contain`}
-                            src={asset.src}
+                            className="h-7 w-7 shrink-0 text-[#2d2b21]"
                           />
-                          <span className="font-epilogue text-[24px] font-bold text-[#2d2b21]">
+                          <span className="font-epilogue translate-y-[2px] text-[24px] font-bold text-[#2d2b21]">
                             {value}
                           </span>
                         </div>

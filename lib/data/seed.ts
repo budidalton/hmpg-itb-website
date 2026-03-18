@@ -37,7 +37,7 @@ export const seedSettings: SiteSettings = {
       platform: "linkedin",
       label: "LinkedIn",
       href: "https://linkedin.com/company/hmpg-itb",
-      handle: "HMPG ITB",
+      handle: "Himpunan Mahasiswa Teknik Pangan ITB",
     },
     {
       platform: "youtube",
