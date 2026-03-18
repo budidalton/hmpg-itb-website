@@ -91,7 +91,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.06),transparent_42%)] opacity-50" />
 
           <div className="relative mx-auto flex h-full w-full max-w-[1280px] items-center px-6 pt-8 sm:px-10 lg:px-24">
-            <div className="max-w-[36rem] text-white">
+            <div className="max-w-[42rem] text-white">
               <h1 className="font-epilogue text-[3.25rem] leading-[0.95] font-extrabold tracking-[-0.04em] sm:text-[4.3rem] lg:text-[4.5rem]">
                 {reportsPage.heroTitle.split(" & ").map((part, index) => (
                   <span className="block" key={`${part}-${index}`}>
@@ -100,7 +100,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                 ))}
               </h1>
 
-              <p className="font-manrope mt-7 max-w-[33rem] text-lg leading-[1.65] text-white/90 lg:text-xl">
+              <p className="font-manrope mt-7 max-w-[38rem] text-lg leading-[1.65] text-white/90 lg:text-xl">
                 {reportsPage.heroDescription}
               </p>
             </div>
@@ -283,9 +283,9 @@ function FilterSelect({
   name: string;
 }) {
   return (
-    <div className="relative shrink-0">
+    <div className="relative w-full shrink-0 md:w-auto">
       <select
-        className="border-brand-muted/30 bg-brand-sand text-brand-ink font-manrope h-[35px] appearance-none border px-[17px] pr-8 text-[10px] font-bold tracking-[0.05em] uppercase outline-none"
+        className="border-brand-muted/30 bg-brand-sand text-brand-ink font-manrope h-[35px] w-full appearance-none border px-[17px] pr-8 text-[10px] font-bold tracking-[0.05em] uppercase outline-none"
         defaultValue={defaultValue}
         name={name}
       >

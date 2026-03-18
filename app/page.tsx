@@ -62,7 +62,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section className="relative h-[440px] overflow-hidden bg-[#fff8f0]">
+        <section className="relative overflow-hidden bg-[#fff8f0] py-12 sm:py-16 lg:h-[400px] lg:py-0">
           <div className="absolute inset-0 overflow-hidden">
             <div
               aria-hidden="true"
@@ -72,11 +72,11 @@ export default async function HomePage() {
             <div className="absolute inset-0 bg-[rgba(113,34,36,0.65)]" />
           </div>
 
-          <div className="relative mx-auto max-w-[1280px] px-6 pt-[130px] sm:px-8 lg:px-12">
-            <div className="max-w-[948px] space-y-6 lg:ml-[120px]">
+          <div className="relative mx-auto flex max-w-[1280px] justify-center px-6 sm:px-8 lg:px-12 lg:pt-[140px]">
+            <div className="max-w-[948px] space-y-6 text-justify">
               {home.summaryParagraphs.map((paragraph) => (
                 <p
-                  className="font-manrope text-[16px] leading-8 font-bold text-white"
+                  className="font-manrope text-[15px] leading-8 font-bold text-white sm:text-[16px] md:text-[20px]"
                   key={paragraph}
                 >
                   {paragraph}
@@ -120,7 +120,14 @@ export default async function HomePage() {
                   </span>
                 ) : null}
 
-                <div className="flex flex-col justify-center gap-4 px-8 py-12 md:px-12">
+                <div
+                  className={[
+                    "flex flex-col justify-center gap-4 px-8 pb-12 md:px-12 md:py-12",
+                    wideActivity.badge ? "pt-20 md:pt-12" : "pt-12",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
                   <p className="font-manrope text-[10px] font-bold tracking-[0.1em] text-[#fde089] uppercase">
                     {wideActivity.category}
                   </p>

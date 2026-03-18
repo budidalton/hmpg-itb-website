@@ -122,7 +122,6 @@ export async function saveAboutContentAction(formData: FormData) {
     vision: String(formData.get("vision") ?? store.pages.about.vision),
     missions: parseMultiline(formData.get("missions")),
     values: parseMultiline(formData.get("values")),
-    motto: String(formData.get("motto") ?? store.pages.about.motto),
     logoMeaningTitle: String(
       formData.get("logoMeaningTitle") ?? store.pages.about.logoMeaningTitle,
     ),

@@ -58,7 +58,6 @@ export interface AboutPageContent {
   vision: string;
   missions: string[];
   values: string[];
-  motto: string;
   logoMeaningTitle: string;
   logoMeaningDescription: string;
   logoShowcaseSrc: string;

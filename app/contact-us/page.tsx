@@ -46,13 +46,13 @@ export default async function ContactPage() {
               className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-20 mix-blend-multiply"
               src="/assets/figma/contact-paper-texture.png"
             />
-            <div className="relative flex min-h-full w-full max-w-[21rem] flex-col justify-center gap-12 md:gap-14">
+            <div className="relative flex min-h-full w-full max-w-[28rem] flex-col justify-center gap-12 md:gap-14 lg:max-w-[32rem]">
               <div>
                 <p className="font-manrope text-brand-stroke text-[10px] font-bold tracking-[0.05em] uppercase">
                   Email Resmi
                 </p>
                 <a
-                  className="font-epilogue text-brand-ink mt-2 block max-w-[18rem] text-[2rem] leading-[1.2] font-semibold tracking-[-0.03em] md:text-[2.1rem]"
+                  className="font-epilogue text-brand-ink mt-2 block text-[2rem] leading-[1.2] font-semibold tracking-[-0.03em] break-words md:text-[2.1rem]"
                   href={`mailto:${store.settings.email}`}
                 >
                   {store.settings.email}
@@ -73,7 +73,7 @@ export default async function ContactPage() {
                 <p className="font-manrope text-brand-stroke text-[10px] font-bold tracking-[0.05em] uppercase">
                   {contact.officeTitle}
                 </p>
-                <p className="font-epilogue text-brand-ink mt-2 max-w-[18rem] text-[2rem] leading-[1.1] font-semibold tracking-[-0.03em] md:text-[2.1rem]">
+                <p className="font-epilogue text-brand-ink mt-2 text-[2rem] leading-[1.1] font-semibold tracking-[-0.03em] md:text-[2.1rem]">
                   {contact.officeAddress}
                 </p>
               </div>

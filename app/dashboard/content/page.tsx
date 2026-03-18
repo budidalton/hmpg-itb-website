@@ -174,7 +174,6 @@ export default async function DashboardContentPage() {
           name="values"
           value={store.pages.about.values.join("\n")}
         />
-        <Field label="Motto" name="motto" value={store.pages.about.motto} />
         <Field
           label="Logo meaning title"
           name="logoMeaningTitle"

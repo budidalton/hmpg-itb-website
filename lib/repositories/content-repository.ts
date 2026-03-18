@@ -24,6 +24,58 @@ type PageContentRow<Key extends PageContentKey = PageContentKey> = {
   value: PageContent<Key>;
 };
 
+function fromSupabaseActivityRow(row: unknown): ActivityHighlight {
+  const value = row as Record<string, unknown>;
+
+  return {
+    id: String(value.id),
+    category: String(value.category),
+    title: String(value.title),
+    description: String(value.description),
+    imageSrc: String(value.image_src),
+    variant: String(value.variant) as ActivityHighlight["variant"],
+    ...(typeof value.badge === "string" && value.badge.trim()
+      ? { badge: value.badge }
+      : {}),
+  };
+}
+
+function fromSupabaseSettingsRow(row: unknown): SiteSettings {
+  const value = row as Record<string, unknown>;
+
+  return {
+    organizationName: String(value.organization_name),
+    shortName: String(value.short_name),
+    tagline: String(value.tagline),
+    logoSrc: String(value.logo_src),
+    footerLogoSrc: String(value.footer_logo_src),
+    addressLines: Array.isArray(value.address_lines)
+      ? value.address_lines.map((item) => String(item))
+      : [],
+    footerAddressLines: Array.isArray(value.footer_address_lines)
+      ? value.footer_address_lines.map((item) => String(item))
+      : [],
+    email: String(value.email),
+    phone: String(value.phone),
+    driveAkademikUrl: String(value.drive_akademik_url),
+    footerCopyright: String(value.footer_copyright),
+    socialLinks: Array.isArray(value.social_links)
+      ? value.social_links.map((item) => {
+          const link = item as Record<string, unknown>;
+
+          return {
+            platform: String(
+              link.platform,
+            ) as SiteSettings["socialLinks"][number]["platform"],
+            label: String(link.label),
+            href: String(link.href),
+            handle: String(link.handle),
+          };
+        })
+      : [],
+  };
+}
+
 function getPageContentValue<Key extends PageContentKey>(
   rows: PageContentRow[] | null,
   key: Key,
@@ -36,7 +88,15 @@ function getPageContentValue<Key extends PageContentKey>(
   const match = rows.find(
     (entry): entry is PageContentRow<Key> => entry.key === key,
   );
-  return match?.value ?? fallback;
+
+  if (!match?.value) {
+    return fallback;
+  }
+
+  return {
+    ...fallback,
+    ...match.value,
+  };
 }
 
 function buildReportRecord(
@@ -90,17 +150,23 @@ export async function getStore() {
     await Promise.all([
       supabase.from("site_settings").select("*").single(),
       supabase.from("page_content").select("*"),
-      supabase.from("activity_highlights").select("*").order("id"),
+      supabase.from("activity_highlights").select("*").order("sort_order"),
       supabase
         .from("reports")
         .select("*")
         .order("published_at", { ascending: false }),
     ]);
 
-  const settings = settingsResult.data as SiteSettings | null;
+  const settings = settingsResult.data
+    ? {
+        ...seedStore.settings,
+        ...fromSupabaseSettingsRow(settingsResult.data),
+      }
+    : null;
   const pageRows = pagesResult.data as PageContentRow[] | null;
-  const activities =
-    (activitiesResult.data as ActivityHighlight[] | null) ?? [];
+  const activities = ((activitiesResult.data as unknown[]) ?? []).map((row) =>
+    fromSupabaseActivityRow(row),
+  );
   const reports = ((reportsResult.data as unknown[]) ?? []).map((row) =>
     fromSupabaseReportRow(row),
   );

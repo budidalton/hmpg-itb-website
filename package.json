@@ -11,6 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "sync:content": "node --env-file=.env scripts/sync-content.mjs",
+    "sync:content:all": "node --env-file=.env scripts/sync-content.mjs --all",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint-staged": "lint-staged",

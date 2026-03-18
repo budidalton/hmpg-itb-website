@@ -4,24 +4,46 @@ import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { getStore } from "@/lib/repositories/content-repository";
 
-const valueIconMap = {
-  Integritas: "/assets/figma/about-value-integritas.svg",
-  Sinergi: "/assets/figma/about-value-sinergi.svg",
-  Inovasi: "/assets/figma/about-value-inovasi.svg",
-  Kreatif: "/assets/figma/about-value-kreatif.svg",
-} as const;
-
-const valueIconClassMap = {
-  Integritas: "h-[21px] w-[22px]",
-  Sinergi: "h-4 w-[22px]",
-  Inovasi: "h-5 w-[15px]",
-  Kreatif: "h-5 w-5",
-} as const;
+const valueAssets = [
+  {
+    src: "/assets/figma/about-value-integritas.svg",
+    className: "h-[21px] w-[22px]",
+  },
+  {
+    src: "/assets/figma/about-value-sinergi.svg",
+    className: "h-4 w-[22px]",
+  },
+  {
+    src: "/assets/figma/about-value-inovasi.svg",
+    className: "h-5 w-[15px]",
+  },
+] as const;
 
 const colorSwatches = [
-  { color: "#831618", label: "Burgundy", bordered: false },
-  { color: "#fde089", label: "Gold", bordered: true },
-  { color: "#18183a", label: "Navy", bordered: false },
+  {
+    color: "#831618",
+    label: "Burgundy",
+    description: "Semangat dan Percaya Diri",
+    bordered: false,
+  },
+  {
+    color: "#fff8f0",
+    label: "Putih Gading",
+    description: "Kebijaksanaan",
+    bordered: true,
+  },
+  {
+    color: "#1f1b10",
+    label: "Hitam",
+    description: "Ketangguhan",
+    bordered: false,
+  },
+  {
+    color: "#fde089",
+    label: "Emas",
+    description: "Kemakmuran",
+    bordered: false,
+  },
 ] as const;
 
 export default async function AboutPage() {
@@ -90,7 +112,7 @@ export default async function AboutPage() {
                 Visi, Misi, & Nilai
               </h2>
               <p className="font-manrope mt-4 text-[12px] font-bold tracking-[0.3em] text-[#5b5b81] uppercase">
-                The Executive Board of HMPG ITB 2026
+                BP &quot;Polaris&quot; HMPG ITB 2026/2027
               </p>
             </div>
 
@@ -99,12 +121,12 @@ export default async function AboutPage() {
                 <img
                   alt=""
                   aria-hidden="true"
-                  className="absolute top-[-32px] right-0 h-[200px] w-[200px] object-contain"
+                  className="absolute top-[-10px] right-3 h-[112px] w-[112px] object-contain sm:top-[-18px] sm:right-4 sm:h-[144px] sm:w-[144px] md:top-[-24px] md:right-5 md:h-[168px] md:w-[168px] lg:top-[-32px] lg:right-7 lg:h-[180px] lg:w-[180px]"
                   src="/assets/figma/about-vision-badge.png"
                 />
                 <div className="max-w-[48rem]">
                   <p className="font-manrope text-[12px] font-bold tracking-[0.3em] text-[#ffc3bd] uppercase">
-                    Visi Utama
+                    Visi
                   </p>
                   <p className="font-epilogue mt-6 max-w-[768px] text-[32px] leading-[1.2] font-bold md:text-[36px] md:leading-[40px]">
                     {about.vision}
@@ -112,9 +134,9 @@ export default async function AboutPage() {
                 </div>
               </article>
 
-              <article className="border-l-4 border-[#831618] bg-[#f0e7d5] px-8 py-10 lg:col-span-2">
+              <article className="border-l-4 border-[#831618] bg-[#f0e7d5] px-8 py-10 lg:col-span-3">
                 <p className="font-manrope text-[12px] font-bold tracking-[0.1em] text-[#831618] uppercase">
-                  Misi Strategis
+                  Misi
                 </p>
                 <div className="mt-8 space-y-3">
                   {about.missions.map((mission, index) => (
@@ -130,33 +152,34 @@ export default async function AboutPage() {
                 </div>
               </article>
 
-              <article className="flex flex-col justify-between bg-[#fde089] px-8 py-10">
-                <div>
-                  <p className="font-manrope text-[12px] font-bold tracking-[0.1em] text-[#2d2b21] uppercase">
-                    Nilai Inti
+              <article className="bg-[#fde089] px-8 py-10 lg:col-span-3 lg:px-12">
+                <div className="flex flex-col gap-6 md:flex-row md:items-center">
+                  <p className="font-manrope shrink-0 text-[12px] font-bold tracking-[0.1em] text-[#2d2b21] uppercase md:mr-12 lg:mr-16">
+                    Nilai
                   </p>
-                  <div className="mt-8 space-y-4">
-                    {about.values.map((value) => (
-                      <div
-                        className="flex items-center gap-[11.99px]"
-                        key={value}
-                      >
-                        <img
-                          alt=""
-                          aria-hidden="true"
-                          className={`${valueIconClassMap[value as keyof typeof valueIconClassMap]} object-contain`}
-                          src={valueIconMap[value as keyof typeof valueIconMap]}
-                        />
-                        <span className="font-epilogue text-[24px] font-bold text-[#2d2b21]">
-                          {value}
-                        </span>
-                      </div>
-                    ))}
+                  <div className="flex flex-1 flex-wrap items-center justify-between gap-x-8 gap-y-4 md:pr-8 lg:pr-16">
+                    {about.values.map((value, index) => {
+                      const asset = valueAssets[index % valueAssets.length]!;
+
+                      return (
+                        <div
+                          className="flex shrink-0 items-center gap-[11.99px]"
+                          key={value}
+                        >
+                          <img
+                            alt=""
+                            aria-hidden="true"
+                            className={`${asset.className} object-contain`}
+                            src={asset.src}
+                          />
+                          <span className="font-epilogue text-[24px] font-bold text-[#2d2b21]">
+                            {value}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
-                <p className="font-manrope mt-8 text-[12px] text-[rgba(45,43,33,0.7)]">
-                  {about.motto}
-                </p>
               </article>
             </div>
           </div>
@@ -173,29 +196,29 @@ export default async function AboutPage() {
               </h2>
             </div>
 
-            <div className="relative mx-auto mt-16 h-[435px] max-w-[896px] overflow-hidden border border-[rgba(223,191,188,0.3)] bg-[#fcf3e0] p-1">
+            <div className="relative mx-auto mt-16 min-h-[435px] max-w-[896px] overflow-hidden border border-[rgba(223,191,188,0.3)] bg-[#fcf3e0] p-1">
               <img
                 alt=""
                 aria-hidden="true"
                 className="pointer-events-none absolute top-[-389px] left-[-16px] h-[990px] w-[921px] max-w-none object-cover opacity-35 mix-blend-multiply"
                 src={about.identityTextureSrc}
               />
-              <div className="relative grid h-full gap-10 bg-white px-8 py-12 md:grid-cols-[256px_1fr] md:items-center md:gap-16 md:px-10 md:py-16">
+              <div className="relative flex h-full flex-col items-center gap-10 bg-white px-8 py-12 md:flex-row md:items-center md:gap-16 md:px-10 md:py-16">
                 <img
                   alt=""
                   aria-hidden="true"
                   className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-15 mix-blend-multiply"
                   src={about.identityTextureSrc}
                 />
-                <div className="flex items-center justify-center">
+                <div className="flex shrink-0 items-center justify-center">
                   <img
                     alt={store.settings.shortName}
-                    className="h-56 w-56 object-contain md:h-64 md:w-64"
+                    className="h-48 w-48 object-contain md:h-64 md:w-64"
                     src={about.logoShowcaseSrc}
                   />
                 </div>
 
-                <div>
+                <div className="flex flex-col items-center text-center md:items-start md:text-left">
                   <h3 className="font-epilogue text-[24px] font-bold text-[#831618]">
                     {about.logoMeaningTitle}
                   </h3>
@@ -203,11 +226,12 @@ export default async function AboutPage() {
                     {about.logoMeaningDescription}
                   </p>
 
-                  <div className="mt-8 flex items-start gap-4">
+                  <div className="mt-8 flex flex-wrap items-start justify-center gap-4 md:justify-start">
                     {colorSwatches.map((swatch) => (
                       <ColorSwatch
                         bordered={swatch.bordered}
                         color={swatch.color}
+                        description={swatch.description}
                         key={swatch.label}
                         label={swatch.label}
                       />
@@ -228,14 +252,16 @@ export default async function AboutPage() {
 function ColorSwatch({
   color,
   label,
+  description,
   bordered = false,
 }: {
   color: string;
   label: string;
+  description: string;
   bordered?: boolean;
 }) {
   return (
-    <div className="flex w-12 flex-col items-center text-center">
+    <div className="flex w-[96px] flex-col items-center text-center">
       <div
         className={[
           "mx-auto h-8 w-8 rounded-[12px]",
@@ -245,8 +271,11 @@ function ColorSwatch({
           .join(" ")}
         style={{ backgroundColor: color }}
       />
-      <p className="font-manrope mt-2 text-[10px] font-bold tracking-[0.05em] whitespace-nowrap text-[#1f1b10] uppercase">
+      <p className="font-manrope mt-2 text-[10px] font-bold tracking-[0.05em] text-[#1f1b10] uppercase">
         {label}
+      </p>
+      <p className="font-manrope mt-1 text-[10px] leading-[1.35] text-[#58413f]">
+        {description}
       </p>
     </div>
   );
