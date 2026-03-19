@@ -2,13 +2,22 @@
 
 import DOMPurify from "isomorphic-dompurify";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 
-import { reportAssetSlots, siteAssetSlots } from "@/lib/cms/config";
+import { siteAssetSlots } from "@/lib/cms/config";
+import {
+  clearAdminSession,
+  createAdminSession,
+  requireAdminSession,
+  requireReportsSession,
+} from "@/lib/auth/session";
 import {
   buildPageContentFromForm,
   buildReportInputFromForm,
   buildSettingsFromForm,
 } from "@/lib/cms/form-values";
+import type { CmsUserRole } from "@/lib/data/types";
 import type { ActivityHighlight } from "@/lib/data/types";
 import {
   deleteReport,
@@ -19,8 +28,18 @@ import {
   saveSettings,
   uploadAsset,
 } from "@/lib/repositories/content-repository";
+import {
+  createCmsUser,
+  deleteCmsUser,
+  updateCmsUserRole,
+} from "@/lib/repositories/cms-user-repository";
+
+function redirectToUsers(params: string) {
+  redirect(`/dashboard/users${params}` as never);
+}
 
 export async function saveSettingsAction(formData: FormData) {
+  await requireAdminSession();
   const store = await getStore();
   const nextSettings = buildSettingsFromForm(formData, store.settings);
 
@@ -30,6 +49,7 @@ export async function saveSettingsAction(formData: FormData) {
 }
 
 export async function saveHomeContentAction(formData: FormData) {
+  await requireAdminSession();
   const store = await getStore();
   const nextHome = buildPageContentFromForm("home", formData, store.pages.home);
 
@@ -38,6 +58,7 @@ export async function saveHomeContentAction(formData: FormData) {
 }
 
 export async function saveActivitiesAction(formData: FormData) {
+  await requireAdminSession();
   const ids = formData.getAll("activityId");
   const categories = formData.getAll("activityCategory");
   const titles = formData.getAll("activityTitle");
@@ -65,6 +86,7 @@ export async function saveActivitiesAction(formData: FormData) {
 }
 
 export async function saveAboutContentAction(formData: FormData) {
+  await requireAdminSession();
   const store = await getStore();
   const nextAbout = buildPageContentFromForm(
     "about",
@@ -77,6 +99,7 @@ export async function saveAboutContentAction(formData: FormData) {
 }
 
 export async function saveReportsContentAction(formData: FormData) {
+  await requireAdminSession();
   const store = await getStore();
   const nextReports = buildPageContentFromForm(
     "reports",
@@ -90,6 +113,7 @@ export async function saveReportsContentAction(formData: FormData) {
 }
 
 export async function saveContactContentAction(formData: FormData) {
+  await requireAdminSession();
   const store = await getStore();
   const nextContact = buildPageContentFromForm(
     "contact",
@@ -102,22 +126,17 @@ export async function saveContactContentAction(formData: FormData) {
 }
 
 export async function saveReportAction(formData: FormData) {
+  await requireReportsSession();
   const store = await getStore();
   const reportId = String(formData.get("id") ?? "").trim();
   const currentReport = reportId
     ? store.reports.find((report) => report.id === reportId)
     : undefined;
   const coverFile = formData.get("coverImageFile");
-  const cardFile = formData.get("cardImageFile");
   let coverImageSrc = String(formData.get("coverImageSrc") ?? "");
-  let cardImageSrc = String(formData.get("cardImageSrc") ?? "");
 
   if (coverFile instanceof File && coverFile.size > 0) {
-    coverImageSrc = await uploadAsset(coverFile, "report-media");
-  }
-
-  if (cardFile instanceof File && cardFile.size > 0) {
-    cardImageSrc = await uploadAsset(cardFile, "report-media");
+    coverImageSrc = await uploadAsset(coverFile, "report-media/previews");
   }
 
   const nextReport = buildReportInputFromForm(formData, currentReport);
@@ -125,12 +144,10 @@ export async function saveReportAction(formData: FormData) {
   await saveReport({
     ...nextReport,
     coverImageSrc,
-    cardImageSrc,
     bodyHtml: DOMPurify.sanitize(nextReport.bodyHtml),
   });
 
   revalidatePath("/dashboard/reports");
-  revalidatePath("/dashboard/assets");
   revalidatePath("/reports");
   revalidatePath("/");
   if (nextReport.slug) {
@@ -139,6 +156,7 @@ export async function saveReportAction(formData: FormData) {
 }
 
 export async function deleteReportAction(formData: FormData) {
+  await requireReportsSession();
   const id = String(formData.get("id") ?? "");
   if (!id) return;
 
@@ -148,6 +166,7 @@ export async function deleteReportAction(formData: FormData) {
 }
 
 export async function uploadCmsAssetAction(formData: FormData) {
+  await requireAdminSession();
   const file = formData.get("assetFile");
   if (!(file instanceof File) || file.size === 0) return;
 
@@ -218,31 +237,10 @@ export async function uploadCmsAssetAction(formData: FormData) {
     revalidatePath("/dashboard/assets");
     return;
   }
-
-  if (targetType === "report") {
-    const reportId = String(formData.get("reportId") ?? "");
-    const allowedKey = reportAssetSlots.find((slot) => slot.key === targetKey);
-    const report = store.reports.find((entry) => entry.id === reportId);
-
-    if (!allowedKey || !report) {
-      return;
-    }
-
-    await saveReport({
-      id: report.id,
-      title: report.title,
-      [allowedKey.key]: nextAssetSrc,
-    });
-
-    revalidatePath("/");
-    revalidatePath("/reports");
-    revalidatePath(`/reports/${report.slug}`);
-    revalidatePath("/dashboard/reports");
-    revalidatePath("/dashboard/assets");
-  }
 }
 
 export async function uploadLogoAction(formData: FormData) {
+  await requireAdminSession();
   const file = formData.get("logoFile");
   if (!(file instanceof File) || file.size === 0) return;
 
@@ -255,4 +253,96 @@ export async function uploadLogoAction(formData: FormData) {
     footerLogoSrc: nextLogoSrc,
   });
   revalidatePath("/", "layout");
+}
+
+export async function createCmsUserAction(formData: FormData) {
+  await requireAdminSession();
+
+  try {
+    await createCmsUser({
+      email: String(formData.get("email") ?? ""),
+      password: String(formData.get("password") ?? ""),
+      role: String(formData.get("role") ?? "writer") as CmsUserRole,
+    });
+    revalidatePath("/dashboard/users");
+    redirectToUsers("?message=User%20baru%20berhasil%20dibuat.");
+  } catch (error) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+
+    const message =
+      error instanceof Error ? error.message : "Gagal membuat user CMS.";
+    redirectToUsers(`?error=${encodeURIComponent(message)}`);
+  }
+}
+
+export async function updateCmsUserRoleAction(formData: FormData) {
+  const session = await requireAdminSession();
+  const id = String(formData.get("id") ?? "");
+  const role = String(formData.get("role") ?? "writer") as CmsUserRole;
+
+  if (!id) {
+    redirectToUsers("?error=User%20tidak%20ditemukan.");
+  }
+
+  try {
+    const updatedUser = await updateCmsUserRole(id, role);
+    if (!updatedUser) {
+      redirectToUsers("?error=User%20tidak%20ditemukan.");
+      return;
+    }
+
+    if (
+      updatedUser.id === session.userId &&
+      updatedUser.role !== session.role
+    ) {
+      await createAdminSession(
+        session.userId,
+        session.email,
+        updatedUser.role,
+        session.mode,
+      );
+    }
+
+    revalidatePath("/dashboard/users");
+    redirectToUsers("?message=Role%20user%20berhasil%20diubah.");
+  } catch (error) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+
+    const message =
+      error instanceof Error ? error.message : "Gagal memperbarui role user.";
+    redirectToUsers(`?error=${encodeURIComponent(message)}`);
+  }
+}
+
+export async function deleteCmsUserAction(formData: FormData) {
+  const session = await requireAdminSession();
+  const id = String(formData.get("id") ?? "");
+
+  if (!id) {
+    redirectToUsers("?error=User%20tidak%20ditemukan.");
+  }
+
+  try {
+    await deleteCmsUser(id);
+    revalidatePath("/dashboard/users");
+
+    if (id === session.userId) {
+      await clearAdminSession();
+      redirect("/dashboard/login?message=Akun%20Anda%20telah%20dihapus.");
+    }
+
+    redirectToUsers("?message=User%20berhasil%20dihapus.");
+  } catch (error) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+
+    const message =
+      error instanceof Error ? error.message : "Gagal menghapus user CMS.";
+    redirectToUsers(`?error=${encodeURIComponent(message)}`);
+  }
 }

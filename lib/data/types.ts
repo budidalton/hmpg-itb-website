@@ -8,12 +8,21 @@ export type SocialPlatform =
   | "tiktok";
 
 export type ReportStatus = "draft" | "published";
+export type CmsUserRole = "admin" | "writer";
 
 export interface SocialLink {
   platform: SocialPlatform;
   label: string;
   href: string;
   handle: string;
+}
+
+export interface CmsUser {
+  id: string;
+  email: string;
+  role: CmsUserRole;
+  displayName?: string;
+  createdAt: string;
 }
 
 export interface SiteSettings {

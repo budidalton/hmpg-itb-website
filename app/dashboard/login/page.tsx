@@ -14,6 +14,8 @@ export default async function DashboardLoginPage({
 }: DashboardLoginPageProps) {
   const params = await searchParams;
   const error = typeof params.error === "string" ? params.error : null;
+  const message = typeof params.message === "string" ? params.message : null;
+  const next = typeof params.next === "string" ? params.next : "";
 
   return (
     <main className="bg-brand-shell flex min-h-screen items-center justify-center px-4">
@@ -25,10 +27,15 @@ export default async function DashboardLoginPage({
           Masuk ke Dashboard
         </h1>
         <p className="font-manrope text-brand-body mt-4 text-base leading-7">
-          Gunakan akun admin untuk mengelola konten publik, laporan, dan aset
-          visual HMPG ITB.
+          Gunakan akun CMS untuk mengelola laporan atau seluruh konten publik
+          HMPG ITB sesuai role Anda.
         </p>
 
+        {message ? (
+          <p className="bg-brand-shell font-manrope text-brand-body mt-6 rounded-2xl px-4 py-3 text-sm">
+            {message}
+          </p>
+        ) : null}
         {error ? (
           <p className="bg-brand-blush font-manrope text-brand-maroon mt-6 rounded-2xl px-4 py-3 text-sm">
             {error}
@@ -44,6 +51,7 @@ export default async function DashboardLoginPage({
         ) : null}
 
         <form action={loginAction} className="mt-8 space-y-5">
+          <input name="next" type="hidden" value={next} />
           <label className="block space-y-2">
             <span className="font-manrope text-brand-body text-xs font-bold tracking-[0.2em] uppercase">
               Email

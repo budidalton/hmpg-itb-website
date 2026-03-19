@@ -18,11 +18,8 @@ export function proxy(request: NextRequest) {
   const hasDemoSession = Boolean(
     request.cookies.get(adminSessionCookieName)?.value,
   );
-  const hasSupabaseSession = request.cookies
-    .getAll()
-    .some((cookie) => cookie.name.startsWith("sb-"));
 
-  if (hasDemoSession || hasSupabaseSession) {
+  if (hasDemoSession) {
     return NextResponse.next();
   }
 

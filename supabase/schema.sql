@@ -14,8 +14,29 @@ create table if not exists public.admin_users (
   id uuid primary key references auth.users(id) on delete cascade,
   email text not null unique,
   display_name text,
+  role text not null default 'admin' check (role in ('admin', 'writer')),
   created_at timestamptz not null default now()
 );
+
+alter table public.admin_users
+add column if not exists role text;
+
+update public.admin_users
+set role = 'admin'
+where role is null;
+
+alter table public.admin_users
+alter column role set default 'admin';
+
+alter table public.admin_users
+alter column role set not null;
+
+alter table public.admin_users
+drop constraint if exists admin_users_role_check;
+
+alter table public.admin_users
+add constraint admin_users_role_check
+check (role in ('admin', 'writer'));
 
 create table if not exists public.site_settings (
   id bigint primary key default 1 check (id = 1),
@@ -115,6 +136,18 @@ before update on public.report_bodies
 for each row
 execute function public.set_updated_at();
 
+create or replace function public.is_cms_user()
+returns boolean
+language sql
+stable
+as $$
+  select exists (
+    select 1
+    from public.admin_users
+    where id = auth.uid()
+  );
+$$;
+
 create or replace function public.is_admin()
 returns boolean
 language sql
@@ -124,6 +157,20 @@ as $$
     select 1
     from public.admin_users
     where id = auth.uid()
+      and role = 'admin'
+  );
+$$;
+
+create or replace function public.can_manage_reports()
+returns boolean
+language sql
+stable
+as $$
+  select exists (
+    select 1
+    from public.admin_users
+    where id = auth.uid()
+      and role in ('admin', 'writer')
   );
 $$;
 
@@ -196,8 +243,8 @@ drop policy if exists "Admins manage reports" on public.reports;
 create policy "Admins manage reports"
 on public.reports
 for all
-using (public.is_admin())
-with check (public.is_admin());
+using (public.can_manage_reports())
+with check (public.can_manage_reports());
 
 drop policy if exists "Public can read published report bodies" on public.report_bodies;
 create policy "Public can read published report bodies"
@@ -216,8 +263,8 @@ drop policy if exists "Admins manage report bodies" on public.report_bodies;
 create policy "Admins manage report bodies"
 on public.report_bodies
 for all
-using (public.is_admin())
-with check (public.is_admin());
+using (public.can_manage_reports())
+with check (public.can_manage_reports());
 
 insert into storage.buckets (id, name, public)
 values ('site-assets', 'site-assets', true)
@@ -250,5 +297,5 @@ drop policy if exists "Admins manage report media" on storage.objects;
 create policy "Admins manage report media"
 on storage.objects
 for all
-using (bucket_id = 'report-media' and public.is_admin())
-with check (bucket_id = 'report-media' and public.is_admin());
+using (bucket_id = 'report-media' and public.can_manage_reports())
+with check (bucket_id = 'report-media' and public.can_manage_reports());
