@@ -3,7 +3,11 @@ import { type NextRequest, NextResponse } from "next/server";
 import { adminSessionCookieName } from "@/lib/auth/session";
 
 const protectedPrefixes = ["/dashboard"];
-const publicDashboardRoutes = ["/dashboard/login", "/dashboard/reset-password"];
+const publicDashboardRoutes = [
+  "/dashboard/login",
+  "/dashboard/reset-password",
+  "/dashboard/reset-password/complete",
+];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

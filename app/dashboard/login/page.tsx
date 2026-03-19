@@ -8,6 +8,7 @@ import {
   DashboardAuthLayout,
   DashboardAuthNotice,
 } from "@/components/dashboard/auth-shell";
+import { AuthRecoveryRedirect } from "@/components/dashboard/auth-recovery-redirect";
 import {
   DashboardAuthInput,
   DashboardAuthPasswordInput,
@@ -33,6 +34,8 @@ export default async function DashboardLoginPage({
       leftTitle="HMPG ITB CMS"
       titleLines={["Login", "Dashboard"]}
     >
+      <AuthRecoveryRedirect />
+
       <div className="space-y-5">
         {message ? (
           <DashboardAuthNotice tone="success">{message}</DashboardAuthNotice>
