@@ -2,7 +2,7 @@ import { AdminShell } from "@/components/dashboard/admin-shell";
 import { Button } from "@/components/ui/button";
 import { uploadCmsAssetAction } from "@/lib/actions/admin";
 import { requireAdminSession } from "@/lib/auth/session";
-import { reportAssetSlots, siteAssetSlots } from "@/lib/cms/config";
+import { siteAssetSlots } from "@/lib/cms/config";
 import { getStore } from "@/lib/repositories/content-repository";
 
 interface DashboardAssetsPageProps {
@@ -14,12 +14,7 @@ export default async function DashboardAssetsPage({
 }: DashboardAssetsPageProps) {
   const session = await requireAdminSession();
   const store = await getStore();
-  const params = await searchParams;
-  const selectedReportSlug =
-    typeof params.report === "string" ? params.report : store.reports[0]?.slug;
-  const selectedReport =
-    store.reports.find((report) => report.slug === selectedReportSlug) ??
-    store.reports[0];
+  await searchParams;
 
   return (
     <AdminShell pathname="/dashboard/assets" session={session}>
@@ -33,86 +28,37 @@ export default async function DashboardAssetsPage({
         </p>
 
         <div className="mt-8 space-y-10">
-          <div className="space-y-4">
-            <div>
-              <h2 className="font-epilogue text-brand-ink text-2xl font-bold">
-                Brand & Page Media
-              </h2>
-              <p className="font-manrope text-brand-body mt-2 text-sm leading-7">
-                Upload logo dan gambar utama yang dipakai langsung di halaman
-                publik.
-              </p>
-            </div>
-
-            <div className="grid gap-6 xl:grid-cols-2">
-              {siteAssetSlots.map((slot) => {
-                const currentSrc = getSiteAssetSrc(store, slot);
-
-                return (
-                  <AssetCard
-                    currentSrc={String(currentSrc ?? "")}
-                    description={slot.description}
-                    folder={slot.folder}
-                    key={slot.id}
-                    label={slot.label}
-                    targetKey={slot.targetKey}
-                    targetType={slot.targetType}
-                    {...(slot.targetType === "page"
-                      ? { pageKey: slot.pageKey }
-                      : {})}
-                  />
-                );
-              })}
-            </div>
+          <div>
+            <h2 className="font-epilogue text-brand-ink text-2xl font-bold">
+              Brand & Page Media
+            </h2>
+            <p className="font-manrope text-brand-body mt-2 max-w-3xl text-sm leading-7">
+              Upload logo dan gambar utama yang dipakai langsung di halaman
+              publik. Media milik report sekarang dikelola langsung di editor
+              Reports supaya preview image dan gambar inline tinggal di satu
+              tempat.
+            </p>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <h2 className="font-epilogue text-brand-ink text-2xl font-bold">
-                  Report Media
-                </h2>
-                <p className="font-manrope text-brand-body mt-2 text-sm leading-7">
-                  Kelola cover image dan card image report tanpa harus masuk ke
-                  editor konten.
-                </p>
-              </div>
+          <div className="grid gap-6 xl:grid-cols-2">
+            {siteAssetSlots.map((slot) => {
+              const currentSrc = getSiteAssetSrc(store, slot);
 
-              {selectedReport ? (
-                <div className="flex flex-wrap gap-3">
-                  {store.reports.map((report) => (
-                    <a
-                      className={`rounded-full border px-4 py-2 text-xs font-bold uppercase transition ${
-                        report.id === selectedReport.id
-                          ? "border-brand-maroon bg-brand-maroon text-white"
-                          : "border-brand-stroke/20 text-brand-body hover:border-brand-maroon hover:text-brand-maroon"
-                      }`}
-                      href={`/dashboard/assets?report=${report.slug}`}
-                      key={report.id}
-                    >
-                      {report.title}
-                    </a>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-
-            {selectedReport ? (
-              <div className="grid gap-6 xl:grid-cols-2">
-                {reportAssetSlots.map((slot) => (
-                  <AssetCard
-                    currentSrc={String(selectedReport[slot.key] ?? "")}
-                    description={`${slot.description} Report aktif: ${selectedReport.title}`}
-                    folder={slot.folder}
-                    key={slot.key}
-                    label={slot.label}
-                    reportId={selectedReport.id}
-                    targetKey={slot.key}
-                    targetType="report"
-                  />
-                ))}
-              </div>
-            ) : null}
+              return (
+                <AssetCard
+                  currentSrc={String(currentSrc ?? "")}
+                  description={slot.description}
+                  folder={slot.folder}
+                  key={slot.id}
+                  label={slot.label}
+                  targetKey={slot.targetKey}
+                  targetType={slot.targetType}
+                  {...(slot.targetType === "page"
+                    ? { pageKey: slot.pageKey }
+                    : {})}
+                />
+              );
+            })}
           </div>
         </div>
       </section>
@@ -150,16 +96,14 @@ function AssetCard({
   targetKey,
   folder,
   pageKey,
-  reportId,
 }: {
   label: string;
   description: string;
   currentSrc: string;
-  targetType: "settings" | "page" | "report";
+  targetType: "settings" | "page";
   targetKey: string;
   folder: string;
   pageKey?: string;
-  reportId?: string;
 }) {
   return (
     <div className="border-brand-stroke/20 grid gap-6 rounded-[2rem] border p-6 lg:grid-cols-[14rem,1fr]">
@@ -184,10 +128,6 @@ function AssetCard({
         {pageKey ? (
           <input name="pageKey" type="hidden" value={pageKey} />
         ) : null}
-        {reportId ? (
-          <input name="reportId" type="hidden" value={reportId} />
-        ) : null}
-
         <div>
           <h3 className="font-epilogue text-brand-ink text-xl font-bold">
             {label}

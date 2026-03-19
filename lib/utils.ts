@@ -1,16 +1,24 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+import type { ReportRecord } from "@/lib/data/types";
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 export function formatDisplayDate(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
   return new Intl.DateTimeFormat("id-ID", {
     day: "2-digit",
     month: "long",
     year: "numeric",
-  }).format(new Date(value));
+  }).format(date);
 }
 
 export function slugify(value: string) {
@@ -34,4 +42,15 @@ export function uniqueBy<T>(items: T[], getKey: (item: T) => string) {
     seen.add(key);
     return true;
   });
+}
+
+export function extractFirstImageSrcFromHtml(html: string) {
+  const match = html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
+  return match?.[1] ?? "";
+}
+
+export function getReportPreviewImage(
+  report: Pick<ReportRecord, "coverImageSrc" | "bodyHtml">,
+) {
+  return report.coverImageSrc || extractFirstImageSrcFromHtml(report.bodyHtml);
 }

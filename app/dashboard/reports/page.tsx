@@ -6,7 +6,7 @@ import {
   type CmsFieldDefinition,
 } from "@/lib/cms/config";
 import { deleteReportAction, saveReportAction } from "@/lib/actions/admin";
-import { requireAdminSession } from "@/lib/auth/session";
+import { requireReportsSession } from "@/lib/auth/session";
 import type { ReportRecord } from "@/lib/data/types";
 import { getStore } from "@/lib/repositories/content-repository";
 
@@ -17,7 +17,7 @@ interface DashboardReportsPageProps {
 export default async function DashboardReportsPage({
   searchParams,
 }: DashboardReportsPageProps) {
-  const session = await requireAdminSession();
+  const session = await requireReportsSession();
   const params = await searchParams;
   const store = await getStore();
   const creatingNew = params.new === "1";
@@ -31,7 +31,7 @@ export default async function DashboardReportsPage({
     (field) => field.key !== "status" && field.key !== "featured",
   );
   const contentFields = reportEditorSections[1].fields.filter(
-    (field) => field.key !== "bodyHtml",
+    (field) => field.key !== "bodyHtml" && field.key !== "coverImageSrc",
   );
 
   return (
@@ -118,33 +118,63 @@ export default async function DashboardReportsPage({
               title={reportEditorSections[1].title}
             />
 
-            <div className="grid gap-5 md:grid-cols-2">
-              <label className="space-y-2">
-                <span className="font-manrope text-brand-body text-xs font-bold tracking-[0.2em] uppercase">
-                  Upload cover image
-                </span>
-                <input
-                  className="border-brand-stroke/20 font-manrope block w-full rounded-2xl border px-4 py-3 text-sm"
-                  name="coverImageFile"
-                  type="file"
-                />
-              </label>
+            <div className="border-brand-stroke/20 space-y-4 rounded-[1.75rem] border p-5">
+              <div className="space-y-2">
+                <h3 className="font-epilogue text-brand-ink text-lg font-bold">
+                  Preview Image
+                </h3>
+                <p className="font-manrope text-brand-body text-sm leading-7">
+                  Gambar ini dipakai untuk card, archive, dan daftar laporan.
+                  Semua gambar di dalam isi report dimasukkan langsung dari
+                  toolbar editor di bawah.
+                </p>
+              </div>
 
-              <label className="space-y-2">
-                <span className="font-manrope text-brand-body text-xs font-bold tracking-[0.2em] uppercase">
-                  Upload card image
-                </span>
-                <input
-                  className="border-brand-stroke/20 font-manrope block w-full rounded-2xl border px-4 py-3 text-sm"
-                  name="cardImageFile"
-                  type="file"
-                />
-              </label>
+              <div className="grid gap-5 md:grid-cols-[1fr,18rem]">
+                <div className="space-y-5">
+                  <label className="space-y-2">
+                    <span className="font-manrope text-brand-body text-xs font-bold tracking-[0.2em] uppercase">
+                      Preview image URL
+                    </span>
+                    <input
+                      className="border-brand-stroke/20 font-manrope h-12 w-full rounded-2xl border px-4 text-sm"
+                      defaultValue={selectedReport?.coverImageSrc ?? ""}
+                      name="coverImageSrc"
+                      type="text"
+                    />
+                  </label>
+
+                  <label className="space-y-2">
+                    <span className="font-manrope text-brand-body text-xs font-bold tracking-[0.2em] uppercase">
+                      Upload preview image
+                    </span>
+                    <input
+                      className="border-brand-stroke/20 font-manrope block w-full rounded-2xl border px-4 py-3 text-sm"
+                      name="coverImageFile"
+                      type="file"
+                    />
+                  </label>
+                </div>
+
+                <div className="bg-brand-shell overflow-hidden rounded-[1.5rem] p-4">
+                  {selectedReport?.coverImageSrc ? (
+                    <img
+                      alt={`${selectedReport.title} preview`}
+                      className="h-52 w-full object-cover"
+                      src={selectedReport.coverImageSrc}
+                    />
+                  ) : (
+                    <div className="text-brand-body flex h-52 items-center justify-center text-sm">
+                      Preview image belum diisi
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="space-y-2">
               <span className="font-manrope text-brand-body text-xs font-bold tracking-[0.2em] uppercase">
-                Body HTML
+                Body Content
               </span>
               <RichTextEditor
                 initialValue={

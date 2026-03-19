@@ -176,6 +176,13 @@ img {
   margin: 2rem 0;
 }
 
+.rich-text img {
+  margin: 2rem 0;
+  width: 100%;
+  border-radius: 1.5rem;
+  object-fit: cover;
+}
+
 .rich-text figcaption {
   margin-top: 0.75rem;
   font-size: 0.9rem;

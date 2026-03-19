@@ -9,7 +9,7 @@ import {
   getReportBySlug,
   getStore,
 } from "@/lib/repositories/content-repository";
-import { formatDisplayDate } from "@/lib/utils";
+import { formatDisplayDate, getReportPreviewImage } from "@/lib/utils";
 
 interface ReportDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -27,6 +27,8 @@ export default async function ReportDetailPage({
   }
 
   const relatedReports = await getRelatedReports(slug);
+  const publishedLabel =
+    formatDisplayDate(report.publishedAt) || "Belum terbit";
 
   return (
     <div className="editorial-shell min-h-screen">
@@ -53,7 +55,7 @@ export default async function ReportDetailPage({
                   Tanggal Terbit
                 </p>
                 <p className="font-manrope text-brand-ink mt-2 text-base font-bold">
-                  {formatDisplayDate(report.publishedAt)}
+                  {publishedLabel}
                 </p>
               </div>
               <div>
@@ -66,19 +68,6 @@ export default async function ReportDetailPage({
               </div>
             </div>
           </div>
-        </section>
-
-        <section className="mx-auto max-w-5xl px-4 pb-14 md:px-8">
-          <img
-            alt={report.title}
-            className="h-[34rem] w-full object-cover"
-            src={report.coverImageSrc}
-          />
-          {report.coverCaption ? (
-            <p className="font-manrope text-brand-body mt-4 text-center text-sm">
-              {report.coverCaption}
-            </p>
-          ) : null}
         </section>
 
         <section className="mx-auto max-w-5xl px-4 pb-24 md:px-8">
@@ -98,11 +87,15 @@ export default async function ReportDetailPage({
                     data-reveal-ignore
                     href={`/reports/${related.slug}`}
                   >
-                    <img
-                      alt={related.title}
-                      className="h-56 w-full object-cover"
-                      src={related.coverImageSrc}
-                    />
+                    {getReportPreviewImage(related) ? (
+                      <img
+                        alt={related.title}
+                        className="h-56 w-full object-cover"
+                        src={getReportPreviewImage(related)}
+                      />
+                    ) : (
+                      <div className="from-brand-shell to-brand-blush h-56 w-full bg-gradient-to-br" />
+                    )}
                     <p className="font-manrope text-brand-maroon text-[0.65rem] font-bold tracking-[0.18em] uppercase">
                       {related.categoryLabel}
                     </p>
@@ -110,7 +103,7 @@ export default async function ReportDetailPage({
                       {related.title}
                     </h3>
                     <p className="font-manrope text-brand-body text-sm">
-                      {formatDisplayDate(related.publishedAt)}
+                      {formatDisplayDate(related.publishedAt) || "Belum terbit"}
                     </p>
                   </Link>
                 </article>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { getStore } from "@/lib/repositories/content-repository";
+import { getReportPreviewImage } from "@/lib/utils";
 
 export default async function HomePage() {
   const store = await getStore();
@@ -163,10 +164,7 @@ export default async function HomePage() {
                     <img
                       alt={featuredReport.title}
                       className="absolute inset-0 h-full w-full object-cover"
-                      src={
-                        featuredReport.cardImageSrc ??
-                        featuredReport.coverImageSrc
-                      }
+                      src={getReportPreviewImage(featuredReport)}
                     />
                     <div className="absolute inset-0 bg-[#712224]/0 transition duration-300 group-hover:bg-[#712224]/8" />
                   </div>
@@ -190,10 +188,7 @@ export default async function HomePage() {
                       <img
                         alt={secondaryReport.title}
                         className="absolute inset-0 h-full w-full object-cover"
-                        src={
-                          secondaryReport.cardImageSrc ??
-                          secondaryReport.coverImageSrc
-                        }
+                        src={getReportPreviewImage(secondaryReport)}
                       />
                       <div className="absolute inset-0 bg-[#712224]/0 transition duration-300 group-hover:bg-[#712224]/8" />
                     </div>
@@ -228,10 +223,7 @@ export default async function HomePage() {
                       <img
                         alt={tertiaryReport.title}
                         className="absolute inset-0 h-full w-full object-cover"
-                        src={
-                          tertiaryReport.cardImageSrc ??
-                          tertiaryReport.coverImageSrc
-                        }
+                        src={getReportPreviewImage(tertiaryReport)}
                       />
                       <div className="absolute inset-0 bg-[#712224]/0 transition duration-300 group-hover:bg-[#712224]/8" />
                     </div>

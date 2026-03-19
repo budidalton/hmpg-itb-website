@@ -101,17 +101,17 @@ function getPageContentValue<Key extends PageContentKey>(
 function buildReportRecord(
   base: Omit<ReportRecord, "cardImageSrc" | "coverCaption" | "summaryLabel">,
   optional: {
-    cardImageSrc: string | undefined;
-    coverCaption: string | undefined;
     summaryLabel: string | undefined;
   },
 ): ReportRecord {
   return {
     ...base,
-    ...(optional.cardImageSrc ? { cardImageSrc: optional.cardImageSrc } : {}),
-    ...(optional.coverCaption ? { coverCaption: optional.coverCaption } : {}),
     ...(optional.summaryLabel ? { summaryLabel: optional.summaryLabel } : {}),
   };
+}
+
+function getNonEmptyString(value: unknown) {
+  return typeof value === "string" && value.trim() ? value : undefined;
 }
 
 function hasSupabaseConfig() {
@@ -136,7 +136,7 @@ function getAdminSupabaseClient() {
 }
 
 export function isDemoMode() {
-  return !hasSupabaseConfig();
+  return process.env.CMS_FORCE_DEMO_MODE === "1" || !hasSupabaseConfig();
 }
 
 export async function getStore() {
@@ -195,12 +195,12 @@ function fromSupabaseReportRow(row: unknown): ReportRecord {
       excerpt: String(value.excerpt),
       category: String(value.category),
       categoryLabel: String(value.category_label),
-      coverImageSrc: String(value.cover_image_src),
-      publishedAt: String(value.published_at),
-      year: String(value.year),
-      periodLabel: String(value.period_label),
-      editionLabel: String(value.edition_label),
-      author: String(value.author),
+      coverImageSrc: getNonEmptyString(value.cover_image_src) ?? "",
+      publishedAt: getNonEmptyString(value.published_at) ?? "",
+      year: getNonEmptyString(value.year) ?? "",
+      periodLabel: getNonEmptyString(value.period_label) ?? "",
+      editionLabel: getNonEmptyString(value.edition_label) ?? "",
+      author: getNonEmptyString(value.author) ?? "",
       status: (value.status as ReportRecord["status"]) ?? "draft",
       featured: Boolean(value.featured),
       bodyHtml: String(value.body_html),
@@ -209,14 +209,6 @@ function fromSupabaseReportRow(row: unknown): ReportRecord {
         : [],
     },
     {
-      cardImageSrc:
-        typeof value.card_image_src === "string"
-          ? value.card_image_src
-          : undefined,
-      coverCaption:
-        typeof value.cover_caption === "string"
-          ? value.cover_caption
-          : undefined,
       summaryLabel:
         typeof value.summary_label === "string"
           ? value.summary_label
@@ -431,7 +423,8 @@ export async function saveReport(
   const existing = input.id
     ? store.reports.find((report) => report.id === input.id)
     : undefined;
-  const slug = input.slug ? slugify(input.slug) : slugify(input.title);
+  const slugSource = getNonEmptyString(input.slug) ?? input.title;
+  const slug = slugify(slugSource);
 
   const report = buildReportRecord(
     {
@@ -439,18 +432,31 @@ export async function saveReport(
       slug,
       title: input.title,
       excerpt: input.excerpt ?? existing?.excerpt ?? "",
-      category: input.category ?? existing?.category ?? "editorial",
+      category:
+        getNonEmptyString(input.category) ?? existing?.category ?? "editorial",
       categoryLabel:
-        input.categoryLabel ?? existing?.categoryLabel ?? "Editorial",
-      coverImageSrc: input.coverImageSrc ?? existing?.coverImageSrc ?? "",
+        getNonEmptyString(input.categoryLabel) ??
+        existing?.categoryLabel ??
+        "Editorial",
+      coverImageSrc:
+        getNonEmptyString(input.coverImageSrc) ?? existing?.coverImageSrc ?? "",
       publishedAt:
-        input.publishedAt ?? existing?.publishedAt ?? new Date().toISOString(),
-      year: input.year ?? existing?.year ?? new Date().getFullYear().toString(),
+        getNonEmptyString(input.publishedAt) ??
+        existing?.publishedAt ??
+        new Date().toISOString(),
+      year:
+        getNonEmptyString(input.year) ??
+        existing?.year ??
+        new Date().getFullYear().toString(),
       periodLabel:
-        input.periodLabel ?? existing?.periodLabel ?? "Periode Aktif",
+        getNonEmptyString(input.periodLabel) ??
+        existing?.periodLabel ??
+        "Periode Aktif",
       editionLabel:
-        input.editionLabel ?? existing?.editionLabel ?? "HMPG Report",
-      author: input.author ?? existing?.author ?? "HMPG ITB",
+        getNonEmptyString(input.editionLabel) ??
+        existing?.editionLabel ??
+        "HMPG Report",
+      author: getNonEmptyString(input.author) ?? existing?.author ?? "HMPG ITB",
       status: input.status ?? existing?.status ?? "draft",
       featured: input.featured ?? existing?.featured ?? false,
       bodyHtml:
@@ -460,9 +466,8 @@ export async function saveReport(
       relatedSlugs: input.relatedSlugs ?? existing?.relatedSlugs ?? [],
     },
     {
-      cardImageSrc: input.cardImageSrc ?? existing?.cardImageSrc,
-      coverCaption: input.coverCaption ?? existing?.coverCaption,
-      summaryLabel: input.summaryLabel ?? existing?.summaryLabel,
+      summaryLabel:
+        getNonEmptyString(input.summaryLabel) ?? existing?.summaryLabel,
     },
   );
 
@@ -490,8 +495,6 @@ export async function saveReport(
         category: report.category,
         category_label: report.categoryLabel,
         cover_image_src: report.coverImageSrc,
-        card_image_src: report.cardImageSrc,
-        cover_caption: report.coverCaption,
         published_at: report.publishedAt,
         year: report.year,
         period_label: report.periodLabel,

@@ -7,6 +7,7 @@ import type { ReportRecord, ReportStatus } from "@/lib/data/types";
 import { filterReports, getStore } from "@/lib/repositories/content-repository";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
+import { formatDisplayDate, getReportPreviewImage } from "@/lib/utils";
 
 interface ReportsPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -209,14 +210,15 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                       <span className="bg-brand-maroon font-manrope absolute top-6 left-6 z-10 px-4 py-1 text-[10px] font-bold tracking-[0.1em] text-white uppercase">
                         Terbaru
                       </span>
-                      <img
-                        alt={featuredReport.title}
-                        className="h-full min-h-[30rem] w-full object-cover"
-                        src={
-                          featuredReport.cardImageSrc ??
-                          featuredReport.coverImageSrc
-                        }
-                      />
+                      {getReportPreviewImage(featuredReport) ? (
+                        <img
+                          alt={featuredReport.title}
+                          className="h-full min-h-[30rem] w-full object-cover"
+                          src={getReportPreviewImage(featuredReport)}
+                        />
+                      ) : (
+                        <div className="from-brand-shell to-brand-blush h-full min-h-[30rem] w-full bg-gradient-to-br" />
+                      )}
                       <div className="absolute inset-0 bg-[#712224]/0 transition duration-300 group-hover:bg-[#712224]/8" />
                     </div>
 
@@ -310,6 +312,10 @@ function FilterSelect({
 }
 
 function ReportGridCard({ report }: { report: ReportRecord }) {
+  const previewImage = getReportPreviewImage(report);
+  const periodLabel =
+    report.periodLabel || formatDisplayDate(report.publishedAt);
+
   return (
     <article className="group" data-reveal="card">
       <Link
@@ -318,11 +324,15 @@ function ReportGridCard({ report }: { report: ReportRecord }) {
         href={`/reports/${report.slug}`}
       >
         <div className="bg-brand-surface overflow-hidden">
-          <img
-            alt={report.title}
-            className="h-[27rem] w-full object-cover"
-            src={report.cardImageSrc ?? report.coverImageSrc}
-          />
+          {previewImage ? (
+            <img
+              alt={report.title}
+              className="h-[27rem] w-full object-cover"
+              src={previewImage}
+            />
+          ) : (
+            <div className="from-brand-shell to-brand-blush h-[27rem] w-full bg-gradient-to-br" />
+          )}
         </div>
 
         <div className="space-y-3 pt-6">
@@ -331,7 +341,7 @@ function ReportGridCard({ report }: { report: ReportRecord }) {
               {report.categoryLabel}
             </span>
             <span className="text-brand-stroke font-manrope pt-1">
-              {report.periodLabel}
+              {periodLabel || "Belum terbit"}
             </span>
           </div>
 

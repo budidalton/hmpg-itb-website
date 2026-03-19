@@ -118,7 +118,7 @@ describe("CMS sync guardrails", () => {
     expect(nextContact.socialSectionTitle).toBe("Connect With Us");
   });
 
-  it("builds report inputs with card media and related slugs intact", () => {
+  it("builds report inputs with preview media and related slugs intact", () => {
     const existingReport = seedReports[0]!;
     const formData = new FormData();
 
@@ -136,10 +136,11 @@ describe("CMS sync guardrails", () => {
     formData.set("status", "published");
     formData.set("featured", "on");
     formData.set("coverImageSrc", "/assets/figma/report-detail-hero.png");
-    formData.set("cardImageSrc", "/assets/figma/reports-card-keuangan.png");
-    formData.set("coverCaption", "Sync caption");
     formData.set("relatedSlugs", "alpha\nbeta");
-    formData.set("bodyHtml", "<section><p>Sync body</p></section>");
+    formData.set(
+      "bodyHtml",
+      '<section><p>Sync body</p><img alt="Inline" src="/assets/figma/reports-card-keuangan.png" /></section>',
+    );
 
     const nextReport = buildReportInputFromForm(formData, existingReport);
 
@@ -147,9 +148,6 @@ describe("CMS sync guardrails", () => {
       expect(nextReport).toHaveProperty(String(key));
     }
 
-    expect(nextReport.cardImageSrc).toBe(
-      "/assets/figma/reports-card-keuangan.png",
-    );
     expect(nextReport.coverImageSrc).toBe(
       "/assets/figma/report-detail-hero.png",
     );

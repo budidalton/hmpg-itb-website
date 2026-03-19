@@ -5,7 +5,7 @@ export default defineConfig({
   testDir: "./tests/e2e",
   workers: 1,
   use: {
-    baseURL: "http://127.0.0.1:3100",
+    baseURL: "http://127.0.0.1:3110",
     trace: "on-first-retry",
   },
   projects: [
@@ -15,8 +15,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run dev -- --hostname 127.0.0.1 --port 3100",
-    port: 3100,
+    command:
+      "CMS_FORCE_DEMO_MODE=1 npm run build && CMS_FORCE_DEMO_MODE=1 npm run start -- --hostname 127.0.0.1 --port 3110",
+    port: 3110,
     reuseExistingServer: true,
+    timeout: 180_000,
   },
 });

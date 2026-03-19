@@ -409,7 +409,8 @@ export const reportEditorSections = [
   },
   {
     title: "Content & Media",
-    description: "Field isi laporan, relasi, dan visual card/detail report.",
+    description:
+      "Field isi laporan, relasi, dan satu gambar preview untuk archive/list report.",
     fields: [
       {
         key: "excerpt",
@@ -419,17 +420,7 @@ export const reportEditorSections = [
       {
         key: "coverImageSrc",
         kind: "url",
-        label: "Cover image URL",
-      },
-      {
-        key: "cardImageSrc",
-        kind: "url",
-        label: "Card image URL",
-      },
-      {
-        key: "coverCaption",
-        kind: "text",
-        label: "Cover caption",
+        label: "Preview image URL",
       },
       {
         key: "relatedSlugs",
@@ -517,26 +508,6 @@ export const siteAssetSlots = [
     targetKey: "showcaseImageSrc",
   },
 ] as const;
-
-export const reportAssetSlots = [
-  {
-    key: "coverImageSrc",
-    label: "Report cover image",
-    description: "Gambar utama pada detail report.",
-    folder: "report-media",
-  },
-  {
-    key: "cardImageSrc",
-    label: "Report card image",
-    description: "Gambar yang tampil di card/list report.",
-    folder: "report-media",
-  },
-] as const satisfies {
-  key: "coverImageSrc" | "cardImageSrc";
-  label: string;
-  description: string;
-  folder: string;
-}[];
 
 export function getSocialFieldName(
   platform: SocialPlatform,
