@@ -71,6 +71,8 @@ export const seedPages: PageContentMap = {
       "Himpunan Mahasiswa Teknik Pangan Institut Teknologi Bandung (HMPG ITB) didirikan pada 12 Mei 2015 sebagai organisasi yang beranggotakan mahasiswa Program Studi Teknik Pangan ITB. HMPG ITB hadir sebagai wadah untuk mengembangkan potensi, memperluas wawasan, serta membangun kebersamaan sebagai satu kesatuan. ",
     ],
     summaryTextureSrc: "/assets/figma/home-summary-texture.png",
+    reportsSectionEyebrow: "Kegiatan",
+    reportsSectionTitle: "HMPG Reports",
   },
   about: {
     heroTitle: "About Us",
@@ -98,6 +100,10 @@ export const seedPages: PageContentMap = {
       "Logo Himpunan Mahasiswa Teknik Pangan ITB memuat logo Ganesha yang merepresentasikan bahwa HMPG ITB merupakan bagian dari Civitas Akademika Institut Teknologi Bandung. Di dalamnya, elemen utama berupa satu cerobong, empat pabrik, dan tiga pasang bulir padi merepresentasikan keilmuan serta keprofesian Teknik Pangan.",
     logoShowcaseSrc: "/assets/figma/about-logo-identity.png",
     identityTextureSrc: "/assets/figma/about-canvas-texture.png",
+    valuesSectionTitle: "Visi, Misi, & Nilai",
+    valuesSectionPeriodLabel: 'BP "Polaris" HMPG ITB 2026/2027',
+    identitySectionEyebrow: "Simbolisme",
+    identitySectionTitle: "Identitas Visual",
   },
   reports: {
     heroTitle: "HMPG ITB Activities & Reports",
@@ -107,6 +113,7 @@ export const seedPages: PageContentMap = {
     driveTitle: "HMPG ITB Member’s Archives",
     driveCtaLabel: "Open Archive Folder",
     featuredReportSlug: "evaluasi-strategis-pencapaian-tahunan-hmpg-itb",
+    latestSectionTitle: "Latest Report",
   },
   contact: {
     heroEyebrow: "Hubungi Kami",
@@ -116,6 +123,7 @@ export const seedPages: PageContentMap = {
     showcaseImageSrc: "/assets/figma/contact-showcase-bg.png",
     officeTitle: "Sekretariat",
     officeAddress: "Gedung Labtek IIA, Kampus ITB Jatinangor",
+    socialSectionTitle: "Sosial Media",
   },
 };
 

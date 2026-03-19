@@ -100,10 +100,10 @@ export default async function AboutPage() {
           <div className="mx-auto max-w-[1232px]">
             <div className="text-center">
               <h2 className="font-epilogue text-[36px] font-extrabold tracking-[-0.025em] text-[#1f1b10]">
-                Visi, Misi, & Nilai
+                {about.valuesSectionTitle}
               </h2>
               <p className="font-manrope mt-4 text-[12px] font-bold tracking-[0.3em] text-[#5b5b81] uppercase">
-                BP &quot;Polaris&quot; HMPG ITB 2026/2027
+                {about.valuesSectionPeriodLabel}
               </p>
             </div>
 
@@ -192,10 +192,10 @@ export default async function AboutPage() {
           <div className="mx-auto max-w-[1232px]">
             <div className="text-center">
               <p className="font-manrope text-[12px] font-bold tracking-[0.05em] text-[#831618] uppercase">
-                Simbolisme
+                {about.identitySectionEyebrow}
               </p>
               <h2 className="font-epilogue mt-3 text-[36px] font-bold text-[#1f1b10]">
-                Identitas Visual
+                {about.identitySectionTitle}
               </h2>
             </div>
 

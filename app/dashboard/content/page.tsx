@@ -1,8 +1,14 @@
 import { AdminShell } from "@/components/dashboard/admin-shell";
 import { Button } from "@/components/ui/button";
 import {
+  cmsSocialPlatforms,
+  getSocialFieldName,
+  pageContentSections,
+  siteSettingsSections,
+  type CmsFieldDefinition,
+} from "@/lib/cms/config";
+import {
   saveAboutContentAction,
-  saveActivitiesAction,
   saveContactContentAction,
   saveHomeContentAction,
   saveReportsContentAction,
@@ -19,254 +25,127 @@ export default async function DashboardContentPage() {
     <AdminShell pathname="/dashboard/content" session={session}>
       <SectionCard
         action={saveSettingsAction}
-        description="Kelola data kontak utama, alamat footer, dan tautan Drive Akademik."
+        description="Kelola identitas singkat organisasi, kontak utama, footer, dan tautan sosial yang tampil di website publik."
         title="Global Settings"
       >
-        <Field label="Email" name="email" value={store.settings.email} />
-        <Field
-          label="Drive Akademik URL"
-          name="driveAkademikUrl"
-          value={store.settings.driveAkademikUrl}
-        />
-        <TextareaField
-          label="Address lines"
-          name="addressLines"
-          value={store.settings.addressLines.join("\n")}
-        />
-        <TextareaField
-          label="Footer address lines"
-          name="footerAddressLines"
-          value={store.settings.footerAddressLines.join("\n")}
-        />
+        {siteSettingsSections.map((section) => (
+          <SectionFields
+            fields={section.fields}
+            key={section.title}
+            title={section.title}
+            value={store.settings}
+          />
+        ))}
+
+        <div className="space-y-4">
+          <div>
+            <h3 className="font-epilogue text-brand-ink text-lg font-bold">
+              Social Links
+            </h3>
+            <p className="font-manrope text-brand-body mt-2 text-sm leading-7">
+              Setiap platform mengikuti struktur yang dipakai footer dan halaman
+              Contact Us.
+            </p>
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-2">
+            {cmsSocialPlatforms.map((platformDef) => {
+              const currentLink = store.settings.socialLinks.find(
+                (link) => link.platform === platformDef.platform,
+              );
+
+              if (!currentLink) {
+                return null;
+              }
+
+              return (
+                <div
+                  className="border-brand-stroke/20 space-y-4 rounded-3xl border p-4"
+                  key={platformDef.platform}
+                >
+                  <p className="font-manrope text-brand-body text-xs font-bold tracking-[0.2em] uppercase">
+                    {platformDef.label}
+                  </p>
+                  <Field
+                    label="Label"
+                    name={getSocialFieldName(platformDef.platform, "label")}
+                    value={currentLink.label}
+                  />
+                  <Field
+                    label="URL"
+                    name={getSocialFieldName(platformDef.platform, "href")}
+                    value={currentLink.href}
+                  />
+                  <Field
+                    label="Handle"
+                    name={getSocialFieldName(platformDef.platform, "handle")}
+                    value={currentLink.handle}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </SectionCard>
 
       <SectionCard
         action={saveHomeContentAction}
-        description="Edit hero copy dan ringkasan utama halaman beranda."
+        description="Edit hero copy, ringkasan utama, dan heading section report di beranda."
         title="Home Page"
       >
-        <Field
-          label="Hero eyebrow"
-          name="heroEyebrow"
-          value={store.pages.home.heroEyebrow}
-        />
-        <Field
-          label="Hero title line 1"
-          name="heroTitleLine1"
-          value={store.pages.home.heroTitleLine1}
-        />
-        <Field
-          label="Hero title line 2"
-          name="heroTitleLine2"
-          value={store.pages.home.heroTitleLine2}
-        />
-        <Field
-          label="Hero CTA label"
-          name="heroCtaLabel"
-          value={store.pages.home.heroCtaLabel}
-        />
-        <Field
-          label="Hero image URL"
-          name="heroImageSrc"
-          value={store.pages.home.heroImageSrc}
-        />
-        <Field
-          label="Summary texture URL"
-          name="summaryTextureSrc"
-          value={store.pages.home.summaryTextureSrc}
-        />
-        <TextareaField
-          label="Summary paragraphs"
-          name="summaryParagraphs"
-          value={store.pages.home.summaryParagraphs.join("\n")}
-        />
-      </SectionCard>
-
-      <SectionCard
-        action={saveActivitiesAction}
-        description="Kelola tiga highlight utama pada beranda."
-        title="Activity Highlights"
-      >
-        {store.activities.map((activity) => (
-          <div
-            className="border-brand-stroke/20 space-y-3 rounded-3xl border p-4"
-            key={activity.id}
-          >
-            <input name="activityId" type="hidden" value={activity.id} />
-            <input
-              name="activityVariant"
-              type="hidden"
-              value={activity.variant}
-            />
-            <Field
-              label="Category"
-              name="activityCategory"
-              value={activity.category}
-            />
-            <Field label="Title" name="activityTitle" value={activity.title} />
-            <TextareaField
-              label="Description"
-              name="activityDescription"
-              value={activity.description}
-            />
-            <Field
-              label="Image URL"
-              name="activityImageSrc"
-              value={activity.imageSrc}
-            />
-            <Field
-              label="Badge"
-              name="activityBadge"
-              value={activity.badge ?? ""}
-            />
-          </div>
+        {pageContentSections.home.map((section) => (
+          <SectionFields
+            fields={section.fields}
+            key={section.title}
+            title={section.title}
+            value={store.pages.home}
+          />
         ))}
       </SectionCard>
 
       <SectionCard
         action={saveAboutContentAction}
-        description="Edit struktur konten dan narasi halaman Tentang Kami."
+        description="Edit struktur konten, narasi periodik, dan visual utama halaman Tentang Kami."
         title="About Page"
       >
-        <Field
-          label="Hero title"
-          name="heroTitle"
-          value={store.pages.about.heroTitle}
-        />
-        <Field
-          label="History eyebrow"
-          name="historyEyebrow"
-          value={store.pages.about.historyEyebrow}
-        />
-        <Field
-          label="History title"
-          name="historyTitle"
-          value={store.pages.about.historyTitle}
-        />
-        <TextareaField
-          label="History paragraphs"
-          name="historyParagraphs"
-          value={store.pages.about.historyParagraphs.join("\n")}
-        />
-        <TextareaField
-          label="Vision"
-          name="vision"
-          value={store.pages.about.vision}
-        />
-        <TextareaField
-          label="Missions"
-          name="missions"
-          value={store.pages.about.missions.join("\n")}
-        />
-        <TextareaField
-          label="Values"
-          name="values"
-          value={store.pages.about.values.join("\n")}
-        />
-        <Field
-          label="Logo meaning title"
-          name="logoMeaningTitle"
-          value={store.pages.about.logoMeaningTitle}
-        />
-        <TextareaField
-          label="Logo meaning description"
-          name="logoMeaningDescription"
-          value={store.pages.about.logoMeaningDescription}
-        />
-        <Field
-          label="Hero image URL"
-          name="heroImageSrc"
-          value={store.pages.about.heroImageSrc}
-        />
-        <Field
-          label="History image URL"
-          name="historyImageSrc"
-          value={store.pages.about.historyImageSrc}
-        />
-        <Field
-          label="Logo image URL"
-          name="logoShowcaseSrc"
-          value={store.pages.about.logoShowcaseSrc}
-        />
-        <Field
-          label="Identity texture URL"
-          name="identityTextureSrc"
-          value={store.pages.about.identityTextureSrc}
-        />
+        {pageContentSections.about.map((section) => (
+          <SectionFields
+            fields={section.fields}
+            key={section.title}
+            title={section.title}
+            value={store.pages.about}
+          />
+        ))}
       </SectionCard>
 
       <SectionCard
         action={saveReportsContentAction}
-        description="Atur hero, banner Drive Akademik, dan featured report di halaman reports."
+        description="Atur hero, archive banner, featured report, dan heading section laporan."
         title="Reports Page"
       >
-        <Field
-          label="Hero title"
-          name="heroTitle"
-          value={store.pages.reports.heroTitle}
-        />
-        <TextareaField
-          label="Hero description"
-          name="heroDescription"
-          value={store.pages.reports.heroDescription}
-        />
-        <Field
-          label="Hero image URL"
-          name="heroImageSrc"
-          value={store.pages.reports.heroImageSrc}
-        />
-        <Field
-          label="Drive title"
-          name="driveTitle"
-          value={store.pages.reports.driveTitle}
-        />
-        <Field
-          label="Drive CTA label"
-          name="driveCtaLabel"
-          value={store.pages.reports.driveCtaLabel}
-        />
-        <Field
-          label="Featured report slug"
-          name="featuredReportSlug"
-          value={store.pages.reports.featuredReportSlug}
-        />
+        {pageContentSections.reports.map((section) => (
+          <SectionFields
+            fields={section.fields}
+            key={section.title}
+            title={section.title}
+            value={store.pages.reports}
+          />
+        ))}
       </SectionCard>
 
       <SectionCard
         action={saveContactContentAction}
-        description="Kelola headline, detail sekretariat, dan showcase visual kontak."
+        description="Kelola headline, detail sekretariat, section sosial, dan showcase visual halaman kontak."
         title="Contact Page"
       >
-        <Field
-          label="Hero eyebrow"
-          name="heroEyebrow"
-          value={store.pages.contact.heroEyebrow}
-        />
-        <Field
-          label="Hero title"
-          name="heroTitle"
-          value={store.pages.contact.heroTitle}
-        />
-        <TextareaField
-          label="Hero description"
-          name="heroDescription"
-          value={store.pages.contact.heroDescription}
-        />
-        <Field
-          label="Office title"
-          name="officeTitle"
-          value={store.pages.contact.officeTitle}
-        />
-        <TextareaField
-          label="Office address"
-          name="officeAddress"
-          value={store.pages.contact.officeAddress}
-        />
-        <Field
-          label="Showcase image URL"
-          name="showcaseImageSrc"
-          value={store.pages.contact.showcaseImageSrc}
-        />
+        {pageContentSections.contact.map((section) => (
+          <SectionFields
+            fields={section.fields}
+            key={section.title}
+            title={section.title}
+            value={store.pages.contact}
+          />
+        ))}
       </SectionCard>
     </AdminShell>
   );
@@ -291,11 +170,71 @@ function SectionCard({
       <p className="font-manrope text-brand-body mt-3 max-w-3xl text-sm leading-7">
         {description}
       </p>
-      <form action={action} className="mt-6 space-y-4">
+      <form action={action} className="mt-6 space-y-6">
         {children}
         <Button type="submit">Simpan</Button>
       </form>
     </section>
+  );
+}
+
+function SectionFields<T extends object>({
+  title,
+  fields,
+  value,
+}: {
+  title: string;
+  fields: readonly CmsFieldDefinition<T>[];
+  value: T;
+}) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="font-epilogue text-brand-ink text-lg font-bold">
+          {title}
+        </h3>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        {fields.map((field) => (
+          <FieldByType field={field} key={String(field.key)} value={value} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FieldByType<T extends object>({
+  field,
+  value,
+}: {
+  field: CmsFieldDefinition<T>;
+  value: T;
+}) {
+  const fieldValue = value[field.key];
+  const name = String(field.key);
+
+  if (field.kind === "multiline" || field.kind === "textarea") {
+    return (
+      <div
+        className={
+          field.kind === "textarea" ? "md:col-span-2" : "md:col-span-2"
+        }
+      >
+        <TextareaField
+          label={field.label}
+          name={name}
+          value={
+            Array.isArray(fieldValue)
+              ? fieldValue.join("\n")
+              : String(fieldValue ?? "")
+          }
+        />
+      </div>
+    );
+  }
+
+  return (
+    <Field label={field.label} name={name} value={String(fieldValue ?? "")} />
   );
 }
 

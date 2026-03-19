@@ -1,8 +1,13 @@
 import { AdminShell } from "@/components/dashboard/admin-shell";
 import { RichTextEditor } from "@/components/dashboard/rich-text-editor";
 import { Button } from "@/components/ui/button";
+import {
+  reportEditorSections,
+  type CmsFieldDefinition,
+} from "@/lib/cms/config";
 import { deleteReportAction, saveReportAction } from "@/lib/actions/admin";
 import { requireAdminSession } from "@/lib/auth/session";
+import type { ReportRecord } from "@/lib/data/types";
 import { getStore } from "@/lib/repositories/content-repository";
 
 interface DashboardReportsPageProps {
@@ -15,19 +20,35 @@ export default async function DashboardReportsPage({
   const session = await requireAdminSession();
   const params = await searchParams;
   const store = await getStore();
+  const creatingNew = params.new === "1";
   const selectedSlug =
     typeof params.report === "string" ? params.report : store.reports[0]?.slug;
-  const selectedReport =
-    store.reports.find((report) => report.slug === selectedSlug) ??
-    store.reports[0];
+  const selectedReport = creatingNew
+    ? undefined
+    : (store.reports.find((report) => report.slug === selectedSlug) ??
+      store.reports[0]);
+  const metadataFields = reportEditorSections[0].fields.filter(
+    (field) => field.key !== "status" && field.key !== "featured",
+  );
+  const contentFields = reportEditorSections[1].fields.filter(
+    (field) => field.key !== "bodyHtml",
+  );
 
   return (
     <AdminShell pathname="/dashboard/reports" session={session}>
       <section className="grid gap-6 xl:grid-cols-[0.9fr,1.3fr]">
         <article className="rounded-[2rem] bg-white p-6 shadow-[0_12px_40px_rgba(0,0,0,0.05)]">
-          <h2 className="font-epilogue text-brand-ink text-2xl font-bold">
-            Laporan
-          </h2>
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="font-epilogue text-brand-ink text-2xl font-bold">
+              Laporan
+            </h2>
+            <a href="/dashboard/reports?new=1">
+              <Button size="sm" type="button">
+                Report Baru
+              </Button>
+            </a>
+          </div>
+
           <div className="mt-6 space-y-4">
             {store.reports.map((report) => (
               <a
@@ -57,54 +78,16 @@ export default async function DashboardReportsPage({
           <h2 className="font-epilogue text-brand-ink text-2xl font-bold">
             {selectedReport ? "Edit laporan" : "Buat laporan baru"}
           </h2>
-          <form action={saveReportAction} className="mt-6 space-y-5">
+          <form action={saveReportAction} className="mt-6 space-y-6">
             <input name="id" type="hidden" value={selectedReport?.id ?? ""} />
+
+            <ReportFieldGrid
+              fields={metadataFields}
+              report={selectedReport}
+              title={reportEditorSections[0].title}
+            />
+
             <div className="grid gap-5 md:grid-cols-2">
-              <FormField
-                defaultValue={selectedReport?.title}
-                label="Title"
-                name="title"
-              />
-              <FormField
-                defaultValue={selectedReport?.slug}
-                label="Slug"
-                name="slug"
-              />
-              <FormField
-                defaultValue={selectedReport?.category}
-                label="Category key"
-                name="category"
-              />
-              <FormField
-                defaultValue={selectedReport?.categoryLabel}
-                label="Category label"
-                name="categoryLabel"
-              />
-              <FormField
-                defaultValue={selectedReport?.editionLabel}
-                label="Edition label"
-                name="editionLabel"
-              />
-              <FormField
-                defaultValue={selectedReport?.periodLabel}
-                label="Period label"
-                name="periodLabel"
-              />
-              <FormField
-                defaultValue={selectedReport?.year}
-                label="Year"
-                name="year"
-              />
-              <FormField
-                defaultValue={selectedReport?.author}
-                label="Author"
-                name="author"
-              />
-              <FormField
-                defaultValue={selectedReport?.publishedAt}
-                label="Published at"
-                name="publishedAt"
-              />
               <label className="space-y-2">
                 <span className="font-manrope text-brand-body text-xs font-bold tracking-[0.2em] uppercase">
                   Status
@@ -118,25 +101,24 @@ export default async function DashboardReportsPage({
                   <option value="published">Published</option>
                 </select>
               </label>
+
+              <label className="bg-brand-shell font-manrope text-brand-ink flex items-center gap-3 rounded-2xl px-4 py-3 text-sm md:self-end">
+                <input
+                  defaultChecked={selectedReport?.featured}
+                  name="featured"
+                  type="checkbox"
+                />
+                Jadikan featured report
+              </label>
             </div>
 
-            <label className="block space-y-2">
-              <span className="font-manrope text-brand-body text-xs font-bold tracking-[0.2em] uppercase">
-                Excerpt
-              </span>
-              <textarea
-                className="border-brand-stroke/20 font-manrope min-h-28 w-full rounded-3xl border px-4 py-4 text-sm"
-                defaultValue={selectedReport?.excerpt ?? ""}
-                name="excerpt"
-              />
-            </label>
+            <ReportFieldGrid
+              fields={contentFields}
+              report={selectedReport}
+              title={reportEditorSections[1].title}
+            />
 
             <div className="grid gap-5 md:grid-cols-2">
-              <FormField
-                defaultValue={selectedReport?.coverImageSrc}
-                label="Cover image URL"
-                name="coverImageSrc"
-              />
               <label className="space-y-2">
                 <span className="font-manrope text-brand-body text-xs font-bold tracking-[0.2em] uppercase">
                   Upload cover image
@@ -147,33 +129,18 @@ export default async function DashboardReportsPage({
                   type="file"
                 />
               </label>
+
+              <label className="space-y-2">
+                <span className="font-manrope text-brand-body text-xs font-bold tracking-[0.2em] uppercase">
+                  Upload card image
+                </span>
+                <input
+                  className="border-brand-stroke/20 font-manrope block w-full rounded-2xl border px-4 py-3 text-sm"
+                  name="cardImageFile"
+                  type="file"
+                />
+              </label>
             </div>
-
-            <FormField
-              defaultValue={selectedReport?.coverCaption}
-              label="Cover caption"
-              name="coverCaption"
-            />
-
-            <label className="bg-brand-shell font-manrope text-brand-ink flex items-center gap-3 rounded-2xl px-4 py-3 text-sm">
-              <input
-                defaultChecked={selectedReport?.featured}
-                name="featured"
-                type="checkbox"
-              />
-              Jadikan featured report
-            </label>
-
-            <label className="block space-y-2">
-              <span className="font-manrope text-brand-body text-xs font-bold tracking-[0.2em] uppercase">
-                Related slugs
-              </span>
-              <textarea
-                className="border-brand-stroke/20 font-manrope min-h-24 w-full rounded-3xl border px-4 py-4 text-sm"
-                defaultValue={selectedReport?.relatedSlugs.join("\n") ?? ""}
-                name="relatedSlugs"
-              />
-            </label>
 
             <div className="space-y-2">
               <span className="font-manrope text-brand-body text-xs font-bold tracking-[0.2em] uppercase">
@@ -189,7 +156,9 @@ export default async function DashboardReportsPage({
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <Button type="submit">Simpan Laporan</Button>
+              <Button type="submit">
+                {selectedReport ? "Simpan Laporan" : "Buat Laporan"}
+              </Button>
             </div>
           </form>
 
@@ -207,24 +176,64 @@ export default async function DashboardReportsPage({
   );
 }
 
-function FormField({
-  defaultValue,
-  label,
-  name,
+function ReportFieldGrid({
+  title,
+  fields,
+  report,
 }: {
-  defaultValue: string | undefined;
-  label: string;
-  name: string;
+  title: string;
+  fields: readonly CmsFieldDefinition<ReportRecord>[];
+  report: ReportRecord | undefined;
 }) {
+  return (
+    <div className="space-y-4">
+      <h3 className="font-epilogue text-brand-ink text-lg font-bold">
+        {title}
+      </h3>
+      <div className="grid gap-5 md:grid-cols-2">
+        {fields.map((field) => (
+          <ReportField field={field} key={String(field.key)} report={report} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ReportField({
+  field,
+  report,
+}: {
+  field: CmsFieldDefinition<ReportRecord>;
+  report: ReportRecord | undefined;
+}) {
+  const value = report?.[field.key];
+
+  if (field.kind === "textarea" || field.kind === "multiline") {
+    return (
+      <label className="space-y-2 md:col-span-2">
+        <span className="font-manrope text-brand-body text-xs font-bold tracking-[0.2em] uppercase">
+          {field.label}
+        </span>
+        <textarea
+          className="border-brand-stroke/20 font-manrope min-h-28 w-full rounded-3xl border px-4 py-4 text-sm"
+          defaultValue={
+            Array.isArray(value) ? value.join("\n") : String(value ?? "")
+          }
+          name={String(field.key)}
+        />
+      </label>
+    );
+  }
+
   return (
     <label className="space-y-2">
       <span className="font-manrope text-brand-body text-xs font-bold tracking-[0.2em] uppercase">
-        {label}
+        {field.label}
       </span>
       <input
         className="border-brand-stroke/20 font-manrope h-12 w-full rounded-2xl border px-4 text-sm"
-        defaultValue={defaultValue ?? ""}
-        name={name}
+        defaultValue={String(value ?? "")}
+        name={String(field.key)}
         type="text"
       />
     </label>

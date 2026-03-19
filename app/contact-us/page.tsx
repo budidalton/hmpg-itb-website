@@ -85,7 +85,7 @@ export default async function ContactPage() {
         <section className="bg-brand-shell border-brand-stroke/10 border-y px-4 py-20 md:px-8 md:py-28">
           <div className="mx-auto max-w-[1280px]">
             <h2 className="font-epilogue text-brand-ink text-center text-[2.25rem] font-extrabold tracking-[-0.025em]">
-              Sosial Media
+              {contact.socialSectionTitle}
             </h2>
             <div className="border-brand-stroke/10 bg-brand-stroke/10 mx-auto mt-12 grid max-w-[1200px] gap-px overflow-hidden border p-px sm:grid-cols-2 lg:grid-cols-5">
               {store.settings.socialLinks.map((social, index) => {

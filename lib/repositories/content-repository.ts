@@ -324,9 +324,35 @@ export async function saveSettings(nextSettings: SiteSettings) {
   }
 
   const supabase = getAdminSupabaseClient();
+  const phoneProbe = await supabase
+    .from("site_settings")
+    .select("phone")
+    .eq("id", 1)
+    .maybeSingle();
   const result = await supabase
     .from("site_settings")
-    .upsert({ id: 1, ...nextSettings })
+    .upsert({
+      id: 1,
+      organization_name: nextSettings.organizationName,
+      short_name: nextSettings.shortName,
+      tagline: nextSettings.tagline,
+      logo_src: nextSettings.logoSrc,
+      footer_logo_src: nextSettings.footerLogoSrc,
+      address_lines: nextSettings.addressLines,
+      footer_address_lines: nextSettings.footerAddressLines,
+      email: nextSettings.email,
+      drive_akademik_url: nextSettings.driveAkademikUrl,
+      footer_copyright: nextSettings.footerCopyright,
+      social_links: nextSettings.socialLinks,
+      ...(!phoneProbe.error
+        ? {
+            phone:
+              phoneProbe.data && typeof phoneProbe.data.phone === "string"
+                ? phoneProbe.data.phone
+                : "",
+          }
+        : {}),
+    })
     .select("*")
     .single();
 
@@ -334,7 +360,7 @@ export async function saveSettings(nextSettings: SiteSettings) {
     throw result.error;
   }
 
-  return result.data as SiteSettings;
+  return fromSupabaseSettingsRow(result.data);
 }
 
 export async function savePageContent<Key extends PageContentKey>(
@@ -374,16 +400,28 @@ export async function saveActivities(activities: ActivityHighlight[]) {
   }
 
   const supabase = getAdminSupabaseClient();
+  const rows = activities.map((activity, index) => ({
+    id: activity.id,
+    badge: activity.badge ?? null,
+    category: activity.category,
+    title: activity.title,
+    description: activity.description,
+    image_src: activity.imageSrc,
+    variant: activity.variant,
+    sort_order: index,
+  }));
   const result = await supabase
     .from("activity_highlights")
-    .upsert(activities)
+    .upsert(rows, { onConflict: "id" })
     .select("*");
 
   if (result.error) {
     throw result.error;
   }
 
-  return result.data as ActivityHighlight[];
+  return ((result.data as unknown[]) ?? []).map((row) =>
+    fromSupabaseActivityRow(row),
+  );
 }
 
 export async function saveReport(

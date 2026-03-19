@@ -249,7 +249,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
             <section className="mt-16">
               <div className="border-brand-muted/30 flex items-end justify-between gap-4 border-b pb-4">
                 <h2 className="font-epilogue text-brand-ink text-2xl font-bold tracking-[-0.03em]">
-                  Latest Report
+                  {reportsPage.latestSectionTitle}
                 </h2>
                 <p className="font-manrope text-brand-stroke hidden text-[10px] font-bold tracking-[0.1em] uppercase sm:block">
                   Menampilkan {displayCountStart}-{displayCountEnd} dari{" "}

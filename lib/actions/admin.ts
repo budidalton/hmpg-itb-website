@@ -3,14 +3,13 @@
 import DOMPurify from "isomorphic-dompurify";
 import { revalidatePath } from "next/cache";
 
-import type {
-  AboutPageContent,
-  ActivityHighlight,
-  ContactPageContent,
-  HomePageContent,
-  ReportsPageContent,
-  SiteSettings,
-} from "@/lib/data/types";
+import { reportAssetSlots, siteAssetSlots } from "@/lib/cms/config";
+import {
+  buildPageContentFromForm,
+  buildReportInputFromForm,
+  buildSettingsFromForm,
+} from "@/lib/cms/form-values";
+import type { ActivityHighlight } from "@/lib/data/types";
 import {
   deleteReport,
   getStore,
@@ -21,53 +20,18 @@ import {
   uploadAsset,
 } from "@/lib/repositories/content-repository";
 
-function parseMultiline(value: FormDataEntryValue | null) {
-  return String(value ?? "")
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-}
-
 export async function saveSettingsAction(formData: FormData) {
   const store = await getStore();
-  const nextSettings: SiteSettings = {
-    ...store.settings,
-    email: String(formData.get("email") ?? store.settings.email),
-    driveAkademikUrl: String(
-      formData.get("driveAkademikUrl") ?? store.settings.driveAkademikUrl,
-    ),
-    addressLines: parseMultiline(formData.get("addressLines")),
-    footerAddressLines: parseMultiline(formData.get("footerAddressLines")),
-  };
+  const nextSettings = buildSettingsFromForm(formData, store.settings);
 
   await saveSettings(nextSettings);
   revalidatePath("/", "layout");
+  revalidatePath("/contact-us");
 }
 
 export async function saveHomeContentAction(formData: FormData) {
   const store = await getStore();
-  const nextHome: HomePageContent = {
-    ...store.pages.home,
-    heroEyebrow: String(
-      formData.get("heroEyebrow") ?? store.pages.home.heroEyebrow,
-    ),
-    heroTitleLine1: String(
-      formData.get("heroTitleLine1") ?? store.pages.home.heroTitleLine1,
-    ),
-    heroTitleLine2: String(
-      formData.get("heroTitleLine2") ?? store.pages.home.heroTitleLine2,
-    ),
-    heroCtaLabel: String(
-      formData.get("heroCtaLabel") ?? store.pages.home.heroCtaLabel,
-    ),
-    heroImageSrc: String(
-      formData.get("heroImageSrc") ?? store.pages.home.heroImageSrc,
-    ),
-    summaryTextureSrc: String(
-      formData.get("summaryTextureSrc") ?? store.pages.home.summaryTextureSrc,
-    ),
-    summaryParagraphs: parseMultiline(formData.get("summaryParagraphs")),
-  };
+  const nextHome = buildPageContentFromForm("home", formData, store.pages.home);
 
   await savePageContent("home", nextHome);
   revalidatePath("/");
@@ -102,40 +66,11 @@ export async function saveActivitiesAction(formData: FormData) {
 
 export async function saveAboutContentAction(formData: FormData) {
   const store = await getStore();
-  const nextAbout: AboutPageContent = {
-    ...store.pages.about,
-    heroTitle: String(formData.get("heroTitle") ?? store.pages.about.heroTitle),
-    historyEyebrow: String(
-      formData.get("historyEyebrow") ?? store.pages.about.historyEyebrow,
-    ),
-    historyTitle: String(
-      formData.get("historyTitle") ?? store.pages.about.historyTitle,
-    ),
-    historyParagraphs: parseMultiline(formData.get("historyParagraphs")),
-    vision: String(formData.get("vision") ?? store.pages.about.vision),
-    missions: parseMultiline(formData.get("missions")),
-    values: parseMultiline(formData.get("values")),
-    logoMeaningTitle: String(
-      formData.get("logoMeaningTitle") ?? store.pages.about.logoMeaningTitle,
-    ),
-    logoMeaningDescription: String(
-      formData.get("logoMeaningDescription") ??
-        store.pages.about.logoMeaningDescription,
-    ),
-    heroImageSrc: String(
-      formData.get("heroImageSrc") ?? store.pages.about.heroImageSrc,
-    ),
-    historyImageSrc: String(
-      formData.get("historyImageSrc") ?? store.pages.about.historyImageSrc,
-    ),
-    logoShowcaseSrc: String(
-      formData.get("logoShowcaseSrc") ?? store.pages.about.logoShowcaseSrc,
-    ),
-    identityTextureSrc: String(
-      formData.get("identityTextureSrc") ??
-        store.pages.about.identityTextureSrc,
-    ),
-  };
+  const nextAbout = buildPageContentFromForm(
+    "about",
+    formData,
+    store.pages.about,
+  );
 
   await savePageContent("about", nextAbout);
   revalidatePath("/about-us");
@@ -143,93 +78,64 @@ export async function saveAboutContentAction(formData: FormData) {
 
 export async function saveReportsContentAction(formData: FormData) {
   const store = await getStore();
-  const nextReports: ReportsPageContent = {
-    ...store.pages.reports,
-    heroTitle: String(
-      formData.get("heroTitle") ?? store.pages.reports.heroTitle,
-    ),
-    heroDescription: String(
-      formData.get("heroDescription") ?? store.pages.reports.heroDescription,
-    ),
-    heroImageSrc: String(
-      formData.get("heroImageSrc") ?? store.pages.reports.heroImageSrc,
-    ),
-    driveTitle: String(
-      formData.get("driveTitle") ?? store.pages.reports.driveTitle,
-    ),
-    driveCtaLabel: String(
-      formData.get("driveCtaLabel") ?? store.pages.reports.driveCtaLabel,
-    ),
-    featuredReportSlug: String(
-      formData.get("featuredReportSlug") ??
-        store.pages.reports.featuredReportSlug,
-    ),
-  };
+  const nextReports = buildPageContentFromForm(
+    "reports",
+    formData,
+    store.pages.reports,
+  );
 
   await savePageContent("reports", nextReports);
   revalidatePath("/reports");
+  revalidatePath("/");
 }
 
 export async function saveContactContentAction(formData: FormData) {
   const store = await getStore();
-  const nextContact: ContactPageContent = {
-    ...store.pages.contact,
-    heroEyebrow: String(
-      formData.get("heroEyebrow") ?? store.pages.contact.heroEyebrow,
-    ),
-    heroTitle: String(
-      formData.get("heroTitle") ?? store.pages.contact.heroTitle,
-    ),
-    heroDescription: String(
-      formData.get("heroDescription") ?? store.pages.contact.heroDescription,
-    ),
-    officeTitle: String(
-      formData.get("officeTitle") ?? store.pages.contact.officeTitle,
-    ),
-    officeAddress: String(
-      formData.get("officeAddress") ?? store.pages.contact.officeAddress,
-    ),
-    showcaseImageSrc: String(
-      formData.get("showcaseImageSrc") ?? store.pages.contact.showcaseImageSrc,
-    ),
-  };
+  const nextContact = buildPageContentFromForm(
+    "contact",
+    formData,
+    store.pages.contact,
+  );
 
   await savePageContent("contact", nextContact);
   revalidatePath("/contact-us");
 }
 
 export async function saveReportAction(formData: FormData) {
+  const store = await getStore();
+  const reportId = String(formData.get("id") ?? "").trim();
+  const currentReport = reportId
+    ? store.reports.find((report) => report.id === reportId)
+    : undefined;
   const coverFile = formData.get("coverImageFile");
+  const cardFile = formData.get("cardImageFile");
   let coverImageSrc = String(formData.get("coverImageSrc") ?? "");
+  let cardImageSrc = String(formData.get("cardImageSrc") ?? "");
 
   if (coverFile instanceof File && coverFile.size > 0) {
     coverImageSrc = await uploadAsset(coverFile, "report-media");
   }
 
+  if (cardFile instanceof File && cardFile.size > 0) {
+    cardImageSrc = await uploadAsset(cardFile, "report-media");
+  }
+
+  const nextReport = buildReportInputFromForm(formData, currentReport);
+
   await saveReport({
-    ...(String(formData.get("id") ?? "").trim()
-      ? { id: String(formData.get("id") ?? "").trim() }
-      : {}),
-    title: String(formData.get("title") ?? ""),
-    slug: String(formData.get("slug") ?? ""),
-    excerpt: String(formData.get("excerpt") ?? ""),
-    category: String(formData.get("category") ?? ""),
-    categoryLabel: String(formData.get("categoryLabel") ?? ""),
+    ...nextReport,
     coverImageSrc,
-    coverCaption: String(formData.get("coverCaption") ?? ""),
-    publishedAt: String(formData.get("publishedAt") ?? ""),
-    year: String(formData.get("year") ?? ""),
-    periodLabel: String(formData.get("periodLabel") ?? ""),
-    editionLabel: String(formData.get("editionLabel") ?? ""),
-    author: String(formData.get("author") ?? ""),
-    status: String(formData.get("status") ?? "draft") as "draft" | "published",
-    featured: formData.get("featured") === "on",
-    relatedSlugs: parseMultiline(formData.get("relatedSlugs")),
-    bodyHtml: DOMPurify.sanitize(String(formData.get("bodyHtml") ?? "")),
+    cardImageSrc,
+    bodyHtml: DOMPurify.sanitize(nextReport.bodyHtml),
   });
 
   revalidatePath("/dashboard/reports");
+  revalidatePath("/dashboard/assets");
   revalidatePath("/reports");
+  revalidatePath("/");
+  if (nextReport.slug) {
+    revalidatePath(`/reports/${nextReport.slug}`);
+  }
 }
 
 export async function deleteReportAction(formData: FormData) {
@@ -239,6 +145,101 @@ export async function deleteReportAction(formData: FormData) {
   await deleteReport(id);
   revalidatePath("/dashboard/reports");
   revalidatePath("/reports");
+}
+
+export async function uploadCmsAssetAction(formData: FormData) {
+  const file = formData.get("assetFile");
+  if (!(file instanceof File) || file.size === 0) return;
+
+  const folder = String(formData.get("folder") ?? "site-assets");
+  const nextAssetSrc = await uploadAsset(file, folder);
+  const store = await getStore();
+  const targetType = String(formData.get("targetType") ?? "");
+  const targetKey = String(formData.get("targetKey") ?? "");
+
+  if (targetType === "settings") {
+    const allowedSlot = siteAssetSlots.find(
+      (slot) => slot.targetType === "settings" && slot.targetKey === targetKey,
+    );
+
+    if (!allowedSlot) {
+      return;
+    }
+
+    await saveSettings({
+      ...store.settings,
+      [allowedSlot.targetKey]: nextAssetSrc,
+    });
+
+    revalidatePath("/", "layout");
+    revalidatePath("/contact-us");
+    revalidatePath("/dashboard/assets");
+    return;
+  }
+
+  if (targetType === "page") {
+    const pageKey = String(formData.get("pageKey") ?? "");
+    const allowedSlot = siteAssetSlots.find(
+      (slot) =>
+        slot.targetType === "page" &&
+        slot.pageKey === pageKey &&
+        slot.targetKey === targetKey,
+    );
+
+    if (
+      pageKey !== "home" &&
+      pageKey !== "about" &&
+      pageKey !== "reports" &&
+      pageKey !== "contact"
+    ) {
+      return;
+    }
+
+    if (!allowedSlot) {
+      return;
+    }
+
+    await savePageContent(pageKey, {
+      ...store.pages[pageKey],
+      [allowedSlot.targetKey]: nextAssetSrc,
+    });
+
+    const pathMap = {
+      home: "/",
+      about: "/about-us",
+      reports: "/reports",
+      contact: "/contact-us",
+    } as const;
+
+    revalidatePath(pathMap[pageKey]);
+    if (pageKey === "reports") {
+      revalidatePath("/");
+    }
+    revalidatePath("/dashboard/assets");
+    return;
+  }
+
+  if (targetType === "report") {
+    const reportId = String(formData.get("reportId") ?? "");
+    const allowedKey = reportAssetSlots.find((slot) => slot.key === targetKey);
+    const report = store.reports.find((entry) => entry.id === reportId);
+
+    if (!allowedKey || !report) {
+      return;
+    }
+
+    await saveReport({
+      id: report.id,
+      title: report.title,
+      [allowedKey.key]: nextAssetSrc,
+    });
+
+    revalidatePath("/");
+    revalidatePath("/reports");
+    revalidatePath(`/reports/${report.slug}`);
+    revalidatePath("/dashboard/reports");
+    revalidatePath("/dashboard/assets");
+  }
 }
 
 export async function uploadLogoAction(formData: FormData) {
@@ -253,6 +254,5 @@ export async function uploadLogoAction(formData: FormData) {
     logoSrc: nextLogoSrc,
     footerLogoSrc: nextLogoSrc,
   });
-
   revalidatePath("/", "layout");
 }

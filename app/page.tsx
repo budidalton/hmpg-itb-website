@@ -99,10 +99,10 @@ export default async function HomePage() {
             <div className="flex items-end justify-between gap-8">
               <div className="space-y-2">
                 <p className="font-manrope text-[12px] font-bold tracking-[0.1em] text-[#831618] uppercase">
-                  kegiatan
+                  {home.reportsSectionEyebrow}
                 </p>
                 <h2 className="font-epilogue text-[36px] leading-10 font-bold tracking-[-0.025em] text-[#1f1b10]">
-                  HMPG Reports
+                  {home.reportsSectionTitle}
                 </h2>
               </div>
 

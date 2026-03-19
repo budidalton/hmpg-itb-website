@@ -38,6 +38,8 @@ export interface HomePageContent {
   heroImageSrc: string;
   summaryParagraphs: string[];
   summaryTextureSrc: string;
+  reportsSectionEyebrow: string;
+  reportsSectionTitle: string;
 }
 
 export interface ActivityHighlight {
@@ -64,6 +66,10 @@ export interface AboutPageContent {
   logoMeaningDescription: string;
   logoShowcaseSrc: string;
   identityTextureSrc: string;
+  valuesSectionTitle: string;
+  valuesSectionPeriodLabel: string;
+  identitySectionEyebrow: string;
+  identitySectionTitle: string;
 }
 
 export interface ReportsPageContent {
@@ -73,6 +79,7 @@ export interface ReportsPageContent {
   driveTitle: string;
   driveCtaLabel: string;
   featuredReportSlug: string;
+  latestSectionTitle: string;
 }
 
 export interface ContactPageContent {
@@ -82,6 +89,7 @@ export interface ContactPageContent {
   showcaseImageSrc: string;
   officeTitle: string;
   officeAddress: string;
+  socialSectionTitle: string;
 }
 
 export interface ReportRecord {
