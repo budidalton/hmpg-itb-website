@@ -39,7 +39,7 @@ export function Button({
   return (
     <button
       className={cn(
-        "font-manrope group/button inline-flex cursor-pointer items-center justify-center gap-2 rounded-none font-bold uppercase transition-[background-color,border-color,color,box-shadow,opacity] duration-200 ease-out select-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-60",
+        "font-manrope group/button inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded-xl font-bold whitespace-nowrap uppercase transition-[background-color,border-color,color,box-shadow,opacity,transform] duration-200 ease-out select-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:translate-y-px disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-60 [&_svg]:pointer-events-none [&_svg]:h-4 [&_svg]:w-4 [&_svg]:shrink-0",
         variants[variant],
         sizes[size],
         className,
@@ -47,7 +47,7 @@ export function Button({
       type={type}
       {...props}
     >
-      <span>{children}</span>
+      {children}
       {iconSrc ? (
         <img
           alt={iconAlt}

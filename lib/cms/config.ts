@@ -30,6 +30,94 @@ export interface CmsSectionDefinition<T extends object> {
   fields: CmsFieldDefinition<T>[];
 }
 
+export const reportCategoryOptions = [
+  {
+    value: "laporan-akhir-tahun",
+    label: "Laporan Akhir Tahun",
+    description: "Rangkuman tahunan organisasi dan pencapaian besar.",
+  },
+  {
+    value: "keilmuan",
+    label: "Keilmuan",
+    description: "Kajian akademik, riset, dan pemetaan pengetahuan.",
+  },
+  {
+    value: "pengmas",
+    label: "Pengmas",
+    description: "Laporan pengabdian masyarakat dan dampak lapangan.",
+  },
+  {
+    value: "kaderisasi",
+    label: "Kaderisasi",
+    description: "Program pengembangan anggota dan regenerasi.",
+  },
+  {
+    value: "keuangan",
+    label: "Keuangan",
+    description: "Transparansi anggaran, audit, dan pertanggungjawaban dana.",
+  },
+  {
+    value: "inventaris",
+    label: "Inventaris",
+    description: "Pencatatan aset, alat, dan kebutuhan operasional.",
+  },
+  {
+    value: "seminar",
+    label: "Seminar",
+    description: "Prosiding acara, webinar, dan forum ilmiah.",
+  },
+  {
+    value: "studi-kasus",
+    label: "Studi Kasus",
+    description: "Analisis mendalam terhadap peristiwa atau objek tertentu.",
+  },
+  {
+    value: "laporan-teknis",
+    label: "Laporan Teknis",
+    description: "Dokumentasi teknis, implementasi, dan evaluasi operasional.",
+  },
+  {
+    value: "editorial",
+    label: "Editorial",
+    description: "Tulisan naratif, opini, dan sudut pandang organisasi.",
+  },
+] as const;
+
+export const dashboardContentTabs = [
+  {
+    key: "settings",
+    label: "Global Settings",
+    description: "Identitas, kontak, dan sosial media organisasi.",
+  },
+  {
+    key: "home",
+    label: "Home",
+    description: "Hero, ringkasan, dan pengantar halaman utama.",
+  },
+  {
+    key: "about",
+    label: "About",
+    description: "Narasi organisasi, sejarah, dan identitas.",
+  },
+  {
+    key: "reports",
+    label: "Reports",
+    description: "Hero halaman laporan dan CTA arsip.",
+  },
+  {
+    key: "contact",
+    label: "Contact",
+    description: "Headline kontak, alamat, dan CTA sosial.",
+  },
+] as const;
+
+export const assetManagedPageFieldKeys = {
+  home: ["heroImageSrc"],
+  about: ["heroImageSrc", "historyImageSrc", "logoShowcaseSrc"],
+  reports: ["heroImageSrc", "featuredReportSlug"],
+  contact: ["showcaseImageSrc"],
+} as const satisfies Record<PageContentKey, readonly string[]>;
+
 export const cmsSocialPlatforms = [
   {
     platform: "instagram",
@@ -118,6 +206,7 @@ export const pageContentSections = {
           key: "heroImageSrc",
           kind: "url",
           label: "Hero image URL",
+          description: "Dikelola dari halaman Assets.",
         },
       ],
     },
@@ -164,6 +253,7 @@ export const pageContentSections = {
           key: "heroImageSrc",
           kind: "url",
           label: "Hero image URL",
+          description: "Dikelola dari halaman Assets.",
         },
         {
           key: "historyEyebrow",
@@ -184,6 +274,7 @@ export const pageContentSections = {
           key: "historyImageSrc",
           kind: "url",
           label: "History image URL",
+          description: "Dikelola dari halaman Assets.",
         },
       ],
     },
@@ -241,6 +332,7 @@ export const pageContentSections = {
           key: "logoShowcaseSrc",
           kind: "url",
           label: "Logo image URL",
+          description: "Dikelola dari halaman Assets.",
         },
         {
           key: "identityTextureSrc",
@@ -270,6 +362,7 @@ export const pageContentSections = {
           key: "heroImageSrc",
           kind: "url",
           label: "Hero image URL",
+          description: "Dikelola dari halaman Assets.",
         },
         {
           key: "driveTitle",
@@ -334,6 +427,7 @@ export const pageContentSections = {
           key: "showcaseImageSrc",
           kind: "url",
           label: "Showcase image URL",
+          description: "Dikelola dari halaman Assets.",
         },
       ],
     },
@@ -347,8 +441,8 @@ export const pageContentSections = {
 
 export const reportEditorSections = [
   {
-    title: "Metadata",
-    description: "Field inti yang menentukan identitas dan publikasi report.",
+    title: "Guided",
+    description: "Field utama yang perlu diisi penulis saat membuat laporan.",
     fields: [
       {
         key: "title",
@@ -356,14 +450,45 @@ export const reportEditorSections = [
         label: "Title",
       },
       {
+        key: "category",
+        kind: "text",
+        label: "Category",
+      },
+      {
+        key: "excerpt",
+        kind: "textarea",
+        label: "Excerpt",
+      },
+      {
+        key: "coverImageSrc",
+        kind: "url",
+        label: "Preview image URL",
+      },
+      {
+        key: "bodyHtml",
+        kind: "textarea",
+        label: "Body HTML",
+      },
+      {
+        key: "status",
+        kind: "text",
+        label: "Status",
+      },
+      {
+        key: "featured",
+        kind: "checkbox",
+        label: "Jadikan featured report",
+      },
+    ],
+  },
+  {
+    title: "Advanced",
+    description: "Field teknis untuk admin ketika perlu penyesuaian manual.",
+    fields: [
+      {
         key: "slug",
         kind: "text",
         label: "Slug",
-      },
-      {
-        key: "category",
-        kind: "text",
-        label: "Category key",
       },
       {
         key: "categoryLabel",
@@ -394,43 +519,6 @@ export const reportEditorSections = [
         key: "publishedAt",
         kind: "datetime",
         label: "Published at",
-      },
-      {
-        key: "status",
-        kind: "text",
-        label: "Status",
-      },
-      {
-        key: "featured",
-        kind: "checkbox",
-        label: "Jadikan featured report",
-      },
-    ],
-  },
-  {
-    title: "Content & Media",
-    description:
-      "Field isi laporan, relasi, dan satu gambar preview untuk archive/list report.",
-    fields: [
-      {
-        key: "excerpt",
-        kind: "textarea",
-        label: "Excerpt",
-      },
-      {
-        key: "coverImageSrc",
-        kind: "url",
-        label: "Preview image URL",
-      },
-      {
-        key: "relatedSlugs",
-        kind: "multiline",
-        label: "Related slugs",
-      },
-      {
-        key: "bodyHtml",
-        kind: "textarea",
-        label: "Body HTML",
       },
     ],
   },
@@ -520,6 +608,14 @@ export function getFieldsFromSections<T extends object>(
   sections: readonly CmsSectionDefinition<T>[],
 ) {
   return sections.flatMap((section) => section.fields);
+}
+
+export function getReportCategoryOption(value: string) {
+  return reportCategoryOptions.find((option) => option.value === value);
+}
+
+export function getReportCategoryLabel(value: string) {
+  return getReportCategoryOption(value)?.label ?? "Editorial";
 }
 
 export const cmsOwnedSettingKeys = getFieldsFromSections(

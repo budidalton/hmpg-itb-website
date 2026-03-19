@@ -1,4 +1,12 @@
+import { ShieldCheck, UserPlus, Users2 } from "lucide-react";
+
 import { AdminShell } from "@/components/dashboard/admin-shell";
+import {
+  DashboardBadge,
+  DashboardPageHeader,
+  DashboardPanel,
+  DashboardPanelHeader,
+} from "@/components/dashboard/dashboard-primitives";
 import { Button } from "@/components/ui/button";
 import {
   createCmsUserAction,
@@ -30,71 +38,42 @@ export default async function DashboardUsersPage({
 
   return (
     <AdminShell pathname="/dashboard/users" session={session}>
-      <section className="rounded-[2rem] bg-white p-6 shadow-[0_12px_40px_rgba(0,0,0,0.05)]">
-        <p className="font-manrope text-brand-maroon text-xs font-bold tracking-[0.24em] uppercase">
-          User Management
-        </p>
-        <h1 className="font-epilogue text-brand-ink mt-4 text-3xl font-bold">
-          Kelola akun CMS
-        </h1>
-        <p className="font-manrope text-brand-body mt-4 max-w-3xl text-sm leading-7">
-          Admin dapat membuat kredensial baru, mengubah role user, dan menghapus
-          akses CMS langsung dari dashboard.
-        </p>
+      <DashboardPageHeader
+        description="Kelola akun CMS, role, dan hak akses pengguna."
+        eyebrow="User Management"
+        title="Manajemen pengguna"
+      />
 
-        {message ? (
-          <p className="bg-brand-shell font-manrope text-brand-body mt-6 rounded-2xl px-4 py-3 text-sm">
-            {message}
-          </p>
-        ) : null}
-        {error ? (
-          <p className="bg-brand-blush font-manrope text-brand-maroon mt-6 rounded-2xl px-4 py-3 text-sm">
-            {error}
-          </p>
-        ) : null}
-      </section>
+      {message ? (
+        <div className="border-brand-sand/70 rounded-[1.5rem] border bg-[#eef8ef] px-4 py-3 text-sm font-medium text-[#1f5d33]">
+          {message}
+        </div>
+      ) : null}
+      {error ? (
+        <div className="border-brand-sand/70 text-brand-maroon rounded-[1.5rem] border bg-[#fff1ee] px-4 py-3 text-sm font-medium">
+          {error}
+        </div>
+      ) : null}
 
-      <section className="grid gap-6 xl:grid-cols-[0.95fr,1.25fr]">
-        <article className="rounded-[2rem] bg-white p-6 shadow-[0_12px_40px_rgba(0,0,0,0.05)]">
-          <h2 className="font-epilogue text-brand-ink text-2xl font-bold">
-            Tambah user
-          </h2>
-          <p className="font-manrope text-brand-body mt-3 text-sm leading-7">
-            Tentukan email, password awal, dan role akses untuk user baru.
-          </p>
-
-          <form action={createCmsUserAction} className="mt-6 space-y-5">
+      <section className="grid gap-5 xl:grid-cols-[24rem_minmax(0,1fr)]">
+        <DashboardPanel>
+          <DashboardPanelHeader
+            description="Tentukan email, password awal, dan role user baru."
+            title="Tambah pengguna"
+          />
+          <form action={createCmsUserAction} className="mt-5 space-y-4">
+            <Field label="Email" name="email" required type="email" />
+            <Field
+              label="Password awal"
+              minLength={8}
+              name="password"
+              required
+              type="password"
+            />
             <label className="block space-y-2">
-              <span className="font-manrope text-brand-body text-xs font-bold tracking-[0.2em] uppercase">
-                Email
-              </span>
-              <input
-                className="border-brand-stroke/20 font-manrope h-12 w-full rounded-2xl border px-4 text-sm"
-                name="email"
-                required
-                type="email"
-              />
-            </label>
-
-            <label className="block space-y-2">
-              <span className="font-manrope text-brand-body text-xs font-bold tracking-[0.2em] uppercase">
-                Password awal
-              </span>
-              <input
-                className="border-brand-stroke/20 font-manrope h-12 w-full rounded-2xl border px-4 text-sm"
-                minLength={8}
-                name="password"
-                required
-                type="password"
-              />
-            </label>
-
-            <label className="block space-y-2">
-              <span className="font-manrope text-brand-body text-xs font-bold tracking-[0.2em] uppercase">
-                Role
-              </span>
+              <span className="text-brand-ink text-sm font-semibold">Role</span>
               <select
-                className="border-brand-stroke/20 font-manrope h-12 w-full rounded-2xl border px-4 text-sm"
+                className="border-brand-sand/80 focus:border-brand-maroon h-12 w-full rounded-[1rem] border bg-white px-4 text-sm outline-none"
                 defaultValue="writer"
                 name="role"
               >
@@ -102,80 +81,135 @@ export default async function DashboardUsersPage({
                 <option value="admin">Admin</option>
               </select>
             </label>
-
-            <Button type="submit">Buat User</Button>
+            <Button type="submit">
+              <UserPlus className="h-4 w-4" />
+              Buat User
+            </Button>
           </form>
-        </article>
+        </DashboardPanel>
 
-        <article className="rounded-[2rem] bg-white p-6 shadow-[0_12px_40px_rgba(0,0,0,0.05)]">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h2 className="font-epilogue text-brand-ink text-2xl font-bold">
-                CMS users
-              </h2>
-              <p className="font-manrope text-brand-body mt-2 text-sm leading-7">
-                Total {users.length} user terdaftar untuk akses dashboard.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-6 space-y-4">
+        <DashboardPanel>
+          <DashboardPanelHeader
+            actions={
+              <DashboardBadge tone="muted">{users.length} user</DashboardBadge>
+            }
+            description="Review akses aktif, ubah role, atau hapus akun yang sudah tidak digunakan."
+            title="Daftar pengguna"
+          />
+          <div className="mt-5 space-y-4">
             {users.map((user) => (
-              <div
-                className="border-brand-stroke/20 rounded-3xl border p-5"
+              <article
+                className="border-brand-sand/70 bg-brand-surface rounded-[1.6rem] border p-5"
                 key={user.id}
               >
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <p className="font-epilogue text-brand-ink text-lg font-bold">
-                      {user.email}
-                    </p>
-                    <p className="font-manrope text-brand-body mt-2 text-sm">
+                <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <h3 className="font-epilogue text-brand-ink text-lg font-bold">
+                        {user.email}
+                      </h3>
+                      <DashboardBadge
+                        tone={user.role === "admin" ? "accent" : "muted"}
+                      >
+                        {user.role}
+                      </DashboardBadge>
+                      {user.id === session.userId ? (
+                        <DashboardBadge tone="success">Anda</DashboardBadge>
+                      ) : null}
+                    </div>
+                    <p className="text-brand-body text-sm">
                       Dibuat pada {formatCreatedAt(user.createdAt)}
-                      {user.id === session.userId ? " • Anda" : ""}
                     </p>
                   </div>
-                  <span className="bg-brand-shell font-manrope text-brand-maroon rounded-full px-4 py-2 text-xs font-bold tracking-[0.18em] uppercase">
-                    {user.role}
-                  </span>
+
+                  <div className="text-brand-body flex items-center gap-2 text-sm">
+                    {user.role === "admin" ? (
+                      <ShieldCheck className="text-brand-maroon h-4 w-4" />
+                    ) : (
+                      <Users2 className="text-brand-maroon h-4 w-4" />
+                    )}
+                    <span>
+                      {user.role === "admin" ? "Akses penuh" : "Reports only"}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="mt-5 flex flex-wrap gap-3">
-                  <form
-                    action={updateCmsUserRoleAction}
-                    className="flex flex-wrap items-end gap-3"
-                  >
-                    <input name="id" type="hidden" value={user.id} />
-                    <label className="space-y-2">
-                      <span className="font-manrope text-brand-body text-xs font-bold tracking-[0.2em] uppercase">
-                        Role
-                      </span>
-                      <select
-                        className="border-brand-stroke/20 font-manrope h-12 rounded-2xl border px-4 text-sm"
-                        defaultValue={user.role}
-                        name="role"
+                <div className="border-brand-sand/70 bg-brand-cream/35 mt-5 rounded-[1.25rem] border p-4">
+                  <label className="block space-y-2">
+                    <span className="text-brand-ink text-sm font-semibold">
+                      Role
+                    </span>
+                    <select
+                      className="border-brand-sand/80 focus:border-brand-maroon h-12 w-full rounded-[1rem] border bg-white px-4 text-sm outline-none"
+                      defaultValue={user.role}
+                      form={`update-role-${user.id}`}
+                      name="role"
+                    >
+                      <option value="writer">Writer</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </label>
+
+                  <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                    <form
+                      action={updateCmsUserRoleAction}
+                      className="sm:shrink-0"
+                      id={`update-role-${user.id}`}
+                    >
+                      <input name="id" type="hidden" value={user.id} />
+                      <Button
+                        className="w-full justify-center sm:min-w-[12rem]"
+                        type="submit"
+                        variant="secondary"
                       >
-                        <option value="writer">Writer</option>
-                        <option value="admin">Admin</option>
-                      </select>
-                    </label>
-                    <Button type="submit" variant="outline">
-                      Simpan Role
-                    </Button>
-                  </form>
+                        Simpan Role
+                      </Button>
+                    </form>
 
-                  <form action={deleteCmsUserAction}>
-                    <input name="id" type="hidden" value={user.id} />
-                    <Button type="submit" variant="outline">
-                      Hapus User
-                    </Button>
-                  </form>
+                    <form action={deleteCmsUserAction} className="sm:shrink-0">
+                      <input name="id" type="hidden" value={user.id} />
+                      <Button
+                        className="w-full justify-center sm:min-w-[10rem]"
+                        type="submit"
+                        variant="outline"
+                      >
+                        Hapus User
+                      </Button>
+                    </form>
+                  </div>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
-        </article>
+        </DashboardPanel>
       </section>
     </AdminShell>
+  );
+}
+
+function Field({
+  label,
+  name,
+  type,
+  required,
+  minLength,
+}: {
+  label: string;
+  name: string;
+  type: string;
+  required?: boolean;
+  minLength?: number;
+}) {
+  return (
+    <label className="block space-y-2">
+      <span className="text-brand-ink text-sm font-semibold">{label}</span>
+      <input
+        className="border-brand-sand/80 focus:border-brand-maroon h-12 w-full rounded-[1rem] border bg-white px-4 text-sm outline-none"
+        minLength={minLength}
+        name={name}
+        required={required}
+        type={type}
+      />
+    </label>
   );
 }
