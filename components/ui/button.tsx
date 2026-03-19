@@ -4,13 +4,13 @@ import { cn } from "@/lib/utils";
 
 const variants = {
   primary:
-    "bg-brand-maroon text-white hover:bg-brand-maroon-dark focus-visible:outline-brand-gold",
+    "border border-brand-maroon bg-brand-maroon text-white hover:border-brand-maroon-dark hover:bg-brand-maroon-dark active:border-brand-wine active:bg-brand-wine focus-visible:outline-brand-gold",
   secondary:
-    "bg-brand-ink text-brand-cream hover:bg-brand-ink/90 focus-visible:outline-brand-gold",
+    "border border-brand-sand bg-brand-cream text-brand-ink hover:border-brand-stroke/40 hover:bg-brand-shell active:border-brand-stroke/60 active:bg-brand-sand focus-visible:outline-brand-gold",
   ghost:
-    "bg-transparent text-brand-ink hover:bg-brand-maroon/5 focus-visible:outline-brand-maroon",
+    "border border-brand-ink bg-brand-ink text-brand-cream hover:bg-[#2a2518] active:bg-[#141108] focus-visible:outline-brand-gold",
   outline:
-    "border border-brand-maroon/20 bg-brand-surface text-brand-ink hover:border-brand-maroon hover:text-brand-maroon focus-visible:outline-brand-maroon",
+    "border border-brand-stroke/40 bg-transparent text-brand-ink hover:border-brand-maroon hover:bg-brand-maroon/5 hover:text-brand-maroon active:border-brand-wine active:bg-brand-maroon/10 active:text-brand-wine focus-visible:outline-brand-maroon",
 };
 
 const sizes = {
@@ -39,8 +39,7 @@ export function Button({
   return (
     <button
       className={cn(
-        "font-manrope group/button inline-flex items-center justify-center gap-2 rounded-none font-bold uppercase transition duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60",
-        "hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(0,0,0,0.14)]",
+        "font-manrope group/button inline-flex cursor-pointer items-center justify-center gap-2 rounded-none font-bold uppercase transition-[background-color,border-color,color,box-shadow,opacity] duration-200 ease-out select-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-60",
         variants[variant],
         sizes[size],
         className,
@@ -53,7 +52,7 @@ export function Button({
         <img
           alt={iconAlt}
           aria-hidden={iconAlt ? undefined : true}
-          className="h-2.5 w-2.5 object-contain transition duration-300 group-hover/button:translate-x-1"
+          className="h-2.5 w-2.5 object-contain transition-transform duration-200 ease-out group-hover/button:translate-x-0.5"
           src={iconSrc}
         />
       ) : null}

@@ -12,7 +12,7 @@ describe("SiteHeader", () => {
     render(<SiteHeader settings={seedSettings} />);
 
     expect(screen.getByText("HMPG ITB")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "HMPG’S Archives" })).toHaveClass(
+    expect(screen.getByRole("link", { name: "HMPG's Archives" })).toHaveClass(
       "text-brand-maroon",
     );
     expect(screen.getByRole("link", { name: "Login" })).toBeInTheDocument();

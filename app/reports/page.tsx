@@ -76,13 +76,13 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
 
   return (
     <div className="bg-brand-surface min-h-screen">
-      <SiteHeader
-        activeHref={"/reports#drive-akademik" as Route}
-        settings={store.settings}
-      />
+      <SiteHeader settings={store.settings} />
 
       <main>
-        <section className="bg-brand-maroon-dark relative h-[36rem] overflow-hidden">
+        <section
+          className="bg-brand-maroon-dark relative h-[36rem] scroll-mt-24 overflow-hidden"
+          id="reports-hero"
+        >
           <img
             alt={reportsPage.heroTitle}
             className="absolute inset-0 h-full w-full object-cover"
@@ -147,7 +147,10 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
               </a>
             </div>
 
-            <form className="border-brand-muted/10 bg-brand-surface mt-10 flex flex-col gap-4 border p-[25px] md:flex-row md:items-center">
+            <form
+              className="border-brand-muted/10 bg-brand-surface mt-10 flex scroll-mt-20 flex-col gap-4 border p-[25px] md:flex-row md:items-center"
+              id="reports-overview"
+            >
               <div className="relative flex-1">
                 <img
                   alt=""
@@ -190,8 +193,11 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
             </form>
 
             {featuredReport ? (
-              <section className="bg-brand-shell mt-10 overflow-hidden">
-                <div className="grid min-h-[42rem] lg:grid-cols-[1.5fr_1fr]">
+              <Link
+                className="group bg-brand-shell mt-10 block cursor-pointer overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-[background-color,box-shadow] duration-300 hover:bg-[#f0e4d1] hover:shadow-[0_18px_36px_rgba(31,27,16,0.08)]"
+                href={`/reports/${featuredReport.slug}`}
+              >
+                <section className="grid min-h-[42rem] lg:grid-cols-[1.5fr_1fr]">
                   <div className="relative overflow-hidden">
                     <span className="bg-brand-maroon font-manrope absolute top-6 left-6 z-10 px-4 py-1 text-[10px] font-bold tracking-[0.1em] text-white uppercase">
                       Terbaru
@@ -204,36 +210,32 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                         featuredReport.coverImageSrc
                       }
                     />
+                    <div className="absolute inset-0 bg-[#712224]/0 transition duration-300 group-hover:bg-[#712224]/8" />
                   </div>
 
-                  <div className="flex flex-col p-8 md:p-12">
+                  <div className="flex flex-col p-8 transition-colors duration-300 md:p-12">
                     <p className="font-manrope text-brand-maroon text-xs font-bold tracking-[0.05em] uppercase">
                       {featuredReport.categoryLabel}
                     </p>
-                    <h2 className="font-epilogue text-brand-ink mt-4 text-[2rem] leading-[1.25] font-bold tracking-[-0.03em]">
+                    <h2 className="font-epilogue text-brand-ink group-hover:text-brand-maroon mt-4 text-[2rem] leading-[1.25] font-bold tracking-[-0.03em] transition-colors duration-300">
                       {featuredReport.title}
                     </h2>
                     <p className="font-manrope text-brand-body mt-6 text-base leading-[1.65]">
                       {featuredReport.excerpt}
                     </p>
 
-                    <div className="mt-auto pt-14">
-                      <Link
-                        className="font-manrope text-brand-maroon inline-flex items-center gap-3 text-xs font-bold tracking-[0.05em] uppercase transition duration-300 hover:gap-4"
-                        href={`/reports/${featuredReport.slug}`}
-                      >
-                        Baca Selengkapnya
-                        <img
-                          alt=""
-                          aria-hidden="true"
-                          className="h-3 w-4 object-contain"
-                          src="/assets/figma/reports-featured-arrow.svg"
-                        />
-                      </Link>
+                    <div className="font-manrope text-brand-maroon mt-auto inline-flex items-center gap-3 pt-14 text-xs font-bold tracking-[0.05em] uppercase transition duration-300 group-hover:gap-4">
+                      Baca Selengkapnya
+                      <img
+                        alt=""
+                        aria-hidden="true"
+                        className="h-3 w-4 object-contain"
+                        src="/assets/figma/reports-featured-arrow.svg"
+                      />
                     </div>
                   </div>
-                </div>
-              </section>
+                </section>
+              </Link>
             ) : null}
 
             <section className="mt-16">

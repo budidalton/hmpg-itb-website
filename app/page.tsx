@@ -7,8 +7,16 @@ import { getStore } from "@/lib/repositories/content-repository";
 
 export default async function HomePage() {
   const store = await getStore();
-  const [featureActivity, verticalActivity, wideActivity] = store.activities;
   const home = store.pages.home;
+  const latestReports = [...store.reports]
+    .filter((report) => report.status === "published")
+    .sort(
+      (left, right) =>
+        new Date(right.publishedAt).getTime() -
+        new Date(left.publishedAt).getTime(),
+    )
+    .slice(0, 3);
+  const [featuredReport, secondaryReport, tertiaryReport] = latestReports;
 
   return (
     <div className="min-h-screen overflow-x-clip bg-[#fff8f0]">
@@ -106,89 +114,122 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            {wideActivity ? (
-              <article className="relative grid overflow-hidden bg-[#712224] md:grid-cols-2">
-                {wideActivity.badge ? (
-                  <span className="font-manrope absolute top-6 left-6 z-10 bg-[#fcf3e0] px-4 py-1 text-[10px] font-bold tracking-[0.1em] text-[#1f1b10] uppercase">
-                    {wideActivity.badge}
-                  </span>
-                ) : null}
-
-                <div
-                  className={[
-                    "flex flex-col justify-center gap-4 px-8 pb-12 md:px-12 md:py-12",
-                    wideActivity.badge ? "pt-20 md:pt-12" : "pt-12",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
+            {featuredReport ? (
+              <article className="group relative overflow-hidden bg-[#712224] shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-[background-color,box-shadow] duration-300 hover:bg-[#7d2928] hover:shadow-[0_18px_36px_rgba(31,27,16,0.08)]">
+                <Link
+                  className="relative grid h-full md:grid-cols-2"
+                  href={`/reports/${featuredReport.slug}`}
                 >
-                  <p className="font-manrope text-[10px] font-bold tracking-[0.1em] text-[#fde089] uppercase">
-                    {wideActivity.category}
-                  </p>
-                  <h3 className="font-epilogue max-w-[496px] text-[30px] leading-[36px] font-bold text-[#f9f0de]">
-                    {wideActivity.title}
-                  </h3>
-                  <p className="font-manrope max-w-[496px] pt-[6.75px] text-[14px] leading-[22.75px] text-[#dfbfbc]">
-                    {wideActivity.description}
-                  </p>
-                </div>
+                  <div className="pointer-events-none absolute inset-0 bg-white/0 transition duration-300 group-hover:bg-white/[0.035]" />
+                  <span className="font-manrope absolute top-6 left-6 z-10 bg-[#fcf3e0] px-4 py-1 text-[10px] font-bold tracking-[0.1em] text-[#1f1b10] uppercase">
+                    Terbaru
+                  </span>
 
-                <div className="relative min-h-[420px] overflow-hidden md:min-h-[592px]">
-                  <img
-                    alt={wideActivity.title}
-                    className="absolute inset-0 h-full w-full object-cover"
-                    src={wideActivity.imageSrc}
-                  />
-                </div>
+                  <div className="relative z-10 flex flex-col justify-center gap-4 px-8 pt-20 pb-12 md:px-12 md:py-12">
+                    <p className="font-manrope text-[10px] font-bold tracking-[0.1em] text-[#fde089] uppercase">
+                      {featuredReport.categoryLabel}
+                    </p>
+                    <h3 className="font-epilogue max-w-[496px] text-[30px] leading-[36px] font-bold text-[#f9f0de] transition duration-300 group-hover:text-white">
+                      {featuredReport.title}
+                    </h3>
+                    <p className="font-manrope max-w-[496px] pt-[6.75px] text-[14px] leading-[22.75px] text-[#dfbfbc]">
+                      {featuredReport.excerpt}
+                    </p>
+
+                    <div className="pt-8">
+                      <span className="font-manrope inline-flex items-center gap-3 text-sm font-bold tracking-[0.08em] text-white uppercase transition-[gap,color] duration-300 group-hover:gap-4 group-hover:text-white">
+                        Baca Selengkapnya
+                        <img
+                          alt=""
+                          aria-hidden="true"
+                          className="h-3 w-4 object-contain opacity-100"
+                          src="/assets/figma/reports-featured-arrow-white.svg"
+                        />
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="relative min-h-[420px] overflow-hidden md:min-h-[592px]">
+                    <img
+                      alt={featuredReport.title}
+                      className="absolute inset-0 h-full w-full object-cover"
+                      src={
+                        featuredReport.cardImageSrc ??
+                        featuredReport.coverImageSrc
+                      }
+                    />
+                    <div className="absolute inset-0 bg-[#712224]/0 transition duration-300 group-hover:bg-[#712224]/8" />
+                  </div>
+                </Link>
               </article>
             ) : null}
 
             <div className="grid gap-8 lg:grid-cols-12">
-              {featureActivity ? (
-                <article className="overflow-hidden bg-[#712224] lg:col-span-8">
-                  <div className="relative h-[437.98px] overflow-hidden">
-                    <img
-                      alt={featureActivity.title}
-                      className="absolute inset-0 h-full w-full object-cover"
-                      src={featureActivity.imageSrc}
-                    />
-                  </div>
+              {secondaryReport ? (
+                <article className="group overflow-hidden bg-[#712224] shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-[background-color,box-shadow] duration-300 hover:bg-[#7d2928] hover:shadow-[0_18px_36px_rgba(31,27,16,0.08)] lg:col-span-8">
+                  <Link
+                    className="relative block h-full"
+                    href={`/reports/${secondaryReport.slug}`}
+                  >
+                    <div className="pointer-events-none absolute inset-0 bg-white/0 transition duration-300 group-hover:bg-white/[0.035]" />
+                    <div className="relative h-[437.98px] overflow-hidden">
+                      <img
+                        alt={secondaryReport.title}
+                        className="absolute inset-0 h-full w-full object-cover"
+                        src={
+                          secondaryReport.cardImageSrc ??
+                          secondaryReport.coverImageSrc
+                        }
+                      />
+                      <div className="absolute inset-0 bg-[#712224]/0 transition duration-300 group-hover:bg-[#712224]/8" />
+                    </div>
 
-                  <div className="space-y-2 px-8 py-12">
-                    <p className="font-manrope text-[10px] font-bold tracking-[0.1em] text-[#fcf3e0] uppercase">
-                      {featureActivity.category}
-                    </p>
-                    <h3 className="font-epilogue text-[24px] leading-8 font-bold text-[#f9f0de]">
-                      {featureActivity.title}
-                    </h3>
-                    <p className="font-manrope text-[14px] leading-5 text-[#dfbfbc]">
-                      {featureActivity.description}
-                    </p>
-                  </div>
+                    <div className="relative z-10 space-y-2 px-8 py-12">
+                      <p className="font-manrope text-[10px] font-bold tracking-[0.1em] text-[#fcf3e0] uppercase">
+                        {secondaryReport.categoryLabel}
+                      </p>
+                      <h3 className="font-epilogue text-[24px] leading-8 font-bold text-[#f9f0de] transition duration-300 group-hover:text-white">
+                        {secondaryReport.title}
+                      </h3>
+                      <p className="font-manrope text-[14px] leading-5 text-[#dfbfbc]">
+                        {secondaryReport.excerpt}
+                      </p>
+                    </div>
+                  </Link>
                 </article>
               ) : null}
 
-              {verticalActivity ? (
-                <article className="bg-[#712224] p-1 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] lg:col-span-4">
-                  <div className="relative h-[435px] overflow-hidden">
-                    <img
-                      alt={verticalActivity.title}
-                      className="absolute inset-0 h-full w-full object-cover"
-                      src={verticalActivity.imageSrc}
-                    />
-                  </div>
+              {tertiaryReport ? (
+                <article className="group overflow-hidden bg-[#712224] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] transition-[background-color,box-shadow] duration-300 hover:bg-[#7d2928] hover:shadow-[0_18px_36px_rgba(31,27,16,0.08)] lg:col-span-4">
+                  <Link
+                    className="relative block h-full"
+                    href={`/reports/${tertiaryReport.slug}`}
+                  >
+                    <div className="pointer-events-none absolute inset-0 bg-white/0 transition duration-300 group-hover:bg-white/[0.035]" />
+                    <div className="relative h-[435px] overflow-hidden">
+                      <img
+                        alt={tertiaryReport.title}
+                        className="absolute inset-0 h-full w-full object-cover"
+                        src={
+                          tertiaryReport.cardImageSrc ??
+                          tertiaryReport.coverImageSrc
+                        }
+                      />
+                      <div className="absolute inset-0 bg-[#712224]/0 transition duration-300 group-hover:bg-[#712224]/8" />
+                    </div>
 
-                  <div className="space-y-2 p-6">
-                    <p className="font-manrope text-[10px] font-bold tracking-[0.1em] text-[#fcf3e0] uppercase">
-                      {verticalActivity.category}
-                    </p>
-                    <h3 className="font-epilogue text-[24px] leading-[25px] font-bold text-[#f9f0de]">
-                      {verticalActivity.title}
-                    </h3>
-                    <p className="font-manrope pt-2 text-[14px] leading-5 text-[#dfbfbc]">
-                      {verticalActivity.description}
-                    </p>
-                  </div>
+                    <div className="relative z-10 space-y-2 p-6">
+                      <p className="font-manrope text-[10px] font-bold tracking-[0.1em] text-[#fcf3e0] uppercase">
+                        {tertiaryReport.categoryLabel}
+                      </p>
+                      <h3 className="font-epilogue text-[24px] leading-[25px] font-bold text-[#f9f0de] transition duration-300 group-hover:text-white">
+                        {tertiaryReport.title}
+                      </h3>
+                      <p className="font-manrope pt-2 text-[14px] leading-5 text-[#dfbfbc]">
+                        {tertiaryReport.excerpt}
+                      </p>
+                    </div>
+                  </Link>
                 </article>
               ) : null}
             </div>
