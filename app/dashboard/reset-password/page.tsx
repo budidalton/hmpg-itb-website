@@ -1,8 +1,13 @@
 import Link from "next/link";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import { resetPasswordAction } from "@/lib/actions/auth";
 
-import { Button } from "@/components/ui/button";
+import {
+  DashboardAuthLayout,
+  DashboardAuthNotice,
+} from "@/components/dashboard/auth-shell";
+import { DashboardAuthInput } from "@/components/dashboard/auth-fields";
 
 interface ResetPasswordPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -16,50 +21,51 @@ export default async function ResetPasswordPage({
   const message = typeof params.message === "string" ? params.message : null;
 
   return (
-    <main className="bg-brand-shell flex min-h-screen items-center justify-center px-4">
-      <div className="w-full max-w-lg rounded-[2rem] bg-white p-8 shadow-[0_20px_60px_rgba(0,0,0,0.08)]">
-        <p className="font-manrope text-brand-maroon text-xs font-bold tracking-[0.24em] uppercase">
-          HMPG CMS
-        </p>
-        <h1 className="font-epilogue text-brand-ink mt-4 text-4xl font-bold">
-          Reset Password
-        </h1>
-
+    <DashboardAuthLayout
+      description="Masukkan email CMS Anda, lalu kami akan mengirim tautan untuk mengatur ulang password."
+      eyebrow="Internal CMS"
+      leftDescription="Akses CMS HMPG ITB tetap memakai identitas visual yang sama agar proses login dan pemulihan akun terasa konsisten."
+      leftTitle="HMPG ITB CMS"
+      titleLines={["Lupa", "Password"]}
+    >
+      <div className="space-y-5">
         {message ? (
-          <p className="bg-brand-shell font-manrope text-brand-body mt-6 rounded-2xl px-4 py-3 text-sm">
-            {message}
-          </p>
+          <DashboardAuthNotice tone="success">{message}</DashboardAuthNotice>
         ) : null}
         {error ? (
-          <p className="bg-brand-blush font-manrope text-brand-maroon mt-6 rounded-2xl px-4 py-3 text-sm">
-            {error}
-          </p>
+          <DashboardAuthNotice tone="danger">{error}</DashboardAuthNotice>
         ) : null}
-
-        <form action={resetPasswordAction} className="mt-8 space-y-5">
-          <label className="block space-y-2">
-            <span className="font-manrope text-brand-body text-xs font-bold tracking-[0.2em] uppercase">
-              Email
-            </span>
-            <input
-              className="border-brand-stroke/20 font-manrope focus:border-brand-maroon h-12 w-full rounded-2xl border px-4 text-sm outline-none"
-              name="email"
-              required
-              type="email"
-            />
-          </label>
-          <Button className="w-full justify-center" type="submit">
-            Kirim Reset Link
-          </Button>
-        </form>
-
-        <Link
-          className="font-manrope text-brand-maroon mt-6 inline-block text-sm font-bold tracking-[0.18em] uppercase"
-          href="/dashboard/login"
-        >
-          Kembali ke Login
-        </Link>
       </div>
-    </main>
+
+      <form action={resetPasswordAction} className="space-y-8">
+        <DashboardAuthInput
+          autoComplete="email"
+          icon="mail"
+          label="Email"
+          name="email"
+          placeholder="email@domain.com"
+          required
+          type="email"
+        />
+
+        <div className="space-y-5">
+          <button
+            className="flex h-14 w-full items-center justify-center gap-3 bg-[#831618] px-6 text-sm font-bold tracking-[0.14em] text-white uppercase transition-colors hover:bg-[#6f1113] active:bg-[#5a0f11]"
+            type="submit"
+          >
+            <span>Kirim Reset Link</span>
+            <ArrowRight className="h-4 w-4" />
+          </button>
+
+          <Link
+            className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[0.08em] text-[#831618] uppercase transition-opacity hover:opacity-70"
+            href="/dashboard/login"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Kembali ke Login</span>
+          </Link>
+        </div>
+      </form>
+    </DashboardAuthLayout>
   );
 }

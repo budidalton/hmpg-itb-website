@@ -1,9 +1,17 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 import { loginAction } from "@/lib/actions/auth";
 import { isDemoMode } from "@/lib/repositories/content-repository";
 
-import { Button } from "@/components/ui/button";
+import {
+  DashboardAuthLayout,
+  DashboardAuthNotice,
+} from "@/components/dashboard/auth-shell";
+import {
+  DashboardAuthInput,
+  DashboardAuthPasswordInput,
+} from "@/components/dashboard/auth-fields";
 
 interface DashboardLoginPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -18,76 +26,71 @@ export default async function DashboardLoginPage({
   const next = typeof params.next === "string" ? params.next : "";
 
   return (
-    <main className="bg-brand-shell flex min-h-screen items-center justify-center px-4">
-      <div className="w-full max-w-lg rounded-[2rem] bg-white p-8 shadow-[0_20px_60px_rgba(0,0,0,0.08)]">
-        <p className="font-manrope text-brand-maroon text-xs font-bold tracking-[0.24em] uppercase">
-          HMPG CMS
-        </p>
-        <h1 className="font-epilogue text-brand-ink mt-4 text-4xl font-bold">
-          Masuk ke Dashboard
-        </h1>
-        <p className="font-manrope text-brand-body mt-4 text-base leading-7">
-          Gunakan akun CMS untuk mengelola laporan atau seluruh konten publik
-          HMPG ITB sesuai role Anda.
-        </p>
-
+    <DashboardAuthLayout
+      description="Masuk ke CMS internal untuk mengelola laporan, konten publik, dan akses dashboard sesuai role Anda."
+      eyebrow="Internal CMS"
+      leftDescription="Gunakan akun CMS untuk mengelola laporan atau seluruh konten publik HMPG ITB sesuai role Anda."
+      leftTitle="HMPG ITB CMS"
+      titleLines={["Login", "Dashboard"]}
+    >
+      <div className="space-y-5">
         {message ? (
-          <p className="bg-brand-shell font-manrope text-brand-body mt-6 rounded-2xl px-4 py-3 text-sm">
-            {message}
-          </p>
+          <DashboardAuthNotice tone="success">{message}</DashboardAuthNotice>
         ) : null}
         {error ? (
-          <p className="bg-brand-blush font-manrope text-brand-maroon mt-6 rounded-2xl px-4 py-3 text-sm">
-            {error}
-          </p>
+          <DashboardAuthNotice tone="danger">{error}</DashboardAuthNotice>
         ) : null}
-
         {isDemoMode() ? (
-          <div className="bg-brand-shell font-manrope text-brand-body mt-6 rounded-3xl p-4 text-sm leading-7">
-            <p className="text-brand-ink font-bold">Mode demo aktif</p>
+          <DashboardAuthNotice>
+            <p className="font-bold text-[#1f1b10]">Mode demo aktif</p>
             <p>Email: {process.env.DEMO_ADMIN_EMAIL ?? "admin@hmpg.local"}</p>
             <p>Password: {process.env.DEMO_ADMIN_PASSWORD ?? "hmpg-demo"}</p>
-          </div>
+          </DashboardAuthNotice>
         ) : null}
-
-        <form action={loginAction} className="mt-8 space-y-5">
-          <input name="next" type="hidden" value={next} />
-          <label className="block space-y-2">
-            <span className="font-manrope text-brand-body text-xs font-bold tracking-[0.2em] uppercase">
-              Email
-            </span>
-            <input
-              className="border-brand-stroke/20 font-manrope focus:border-brand-maroon h-12 w-full rounded-2xl border px-4 text-sm outline-none"
-              name="email"
-              required
-              type="email"
-            />
-          </label>
-
-          <label className="block space-y-2">
-            <span className="font-manrope text-brand-body text-xs font-bold tracking-[0.2em] uppercase">
-              Password
-            </span>
-            <input
-              className="border-brand-stroke/20 font-manrope focus:border-brand-maroon h-12 w-full rounded-2xl border px-4 text-sm outline-none"
-              name="password"
-              required
-              type="password"
-            />
-          </label>
-
-          <Button className="mt-4 w-full justify-center" type="submit">
-            Login
-          </Button>
-        </form>
-
-        <Link
-          className="font-manrope text-brand-maroon mt-6 inline-block text-sm font-bold tracking-[0.18em] uppercase"
-          href="/dashboard/reset-password"
-        >
-          Reset Password
-        </Link>
       </div>
-    </main>
+
+      <form action={loginAction} className="space-y-8">
+        <input name="next" type="hidden" value={next} />
+
+        <div className="space-y-6">
+          <DashboardAuthInput
+            autoComplete="email"
+            icon="mail"
+            label="Email"
+            name="email"
+            placeholder="email@domain.com"
+            required
+            type="email"
+          />
+
+          <DashboardAuthPasswordInput
+            autoComplete="current-password"
+            label="Password"
+            name="password"
+            placeholder="••••••••"
+            required
+          />
+        </div>
+
+        <div className="space-y-7">
+          <div className="flex justify-end">
+            <Link
+              className="text-[10px] font-bold tracking-[0.04em] text-[#831618] uppercase transition-opacity hover:opacity-70"
+              href="/dashboard/reset-password"
+            >
+              Lupa Password?
+            </Link>
+          </div>
+
+          <button
+            className="flex h-14 w-full items-center justify-center gap-3 bg-[#831618] px-6 text-sm font-bold tracking-[0.14em] text-white uppercase transition-colors hover:bg-[#6f1113] active:bg-[#5a0f11]"
+            type="submit"
+          >
+            <span>Login ke Dashboard</span>
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
+      </form>
+    </DashboardAuthLayout>
   );
 }

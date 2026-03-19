@@ -23,7 +23,7 @@ test("public navigation and dashboard login work", async ({ page }) => {
 
   await page.goto("/dashboard/login");
   await expect(
-    page.getByRole("heading", { name: "Masuk ke Dashboard" }),
+    page.getByRole("heading", { name: /Login Dashboard/i }),
   ).toBeVisible();
 
   await page.locator('input[name="email"]').fill("admin@hmpg.local");
