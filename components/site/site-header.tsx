@@ -169,7 +169,7 @@ export function SiteHeader({ settings, activeHref }: SiteHeaderProps) {
 
         <div className="hidden lg:block">
           <Link href="/dashboard/login">
-            <Button className="h-8 px-5 text-[0.65rem]" size="sm">
+            <Button className="h-8 rounded-none px-5 text-[0.65rem]" size="sm">
               Login
             </Button>
           </Link>
@@ -208,7 +208,9 @@ export function SiteHeader({ settings, activeHref }: SiteHeaderProps) {
               );
             })}
             <Link href="/dashboard/login" onClick={() => setIsOpen(false)}>
-              <Button className="w-full justify-center">Login</Button>
+              <Button className="w-full justify-center rounded-none">
+                Login
+              </Button>
             </Link>
           </div>
         </div>
