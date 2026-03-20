@@ -1,7 +1,7 @@
-import DOMPurify from "isomorphic-dompurify";
+import { sanitizeRichTextHtml } from "@/lib/utils";
 
 export function RichText({ html }: { html: string }) {
-  const safeHtml = DOMPurify.sanitize(html);
+  const safeHtml = sanitizeRichTextHtml(html);
 
   return (
     <div className="rich-text" dangerouslySetInnerHTML={{ __html: safeHtml }} />

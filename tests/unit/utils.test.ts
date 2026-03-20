@@ -1,4 +1,9 @@
-import { formatDisplayDate, slugify, uniqueBy } from "@/lib/utils";
+import {
+  formatDisplayDate,
+  sanitizeRichTextHtml,
+  slugify,
+  uniqueBy,
+} from "@/lib/utils";
 
 describe("utils", () => {
   it("slugifies editorial titles into URL-safe slugs", () => {
@@ -25,5 +30,13 @@ describe("utils", () => {
       { id: "1", label: "A" },
       { id: "2", label: "B" },
     ]);
+  });
+
+  it("removes dangerous HTML while keeping editor content", () => {
+    expect(
+      sanitizeRichTextHtml(
+        '<p onclick="alert(1)">Halo</p><script>alert(1)</script><a href="javascript:alert(1)">Klik</a><img src="/image.png" onerror="alert(1)" />',
+      ),
+    ).toBe('<p>Halo</p><a>Klik</a><img src="/image.png" />');
   });
 });

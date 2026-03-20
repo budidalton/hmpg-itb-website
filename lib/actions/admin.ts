@@ -1,6 +1,5 @@
 "use server";
 
-import DOMPurify from "isomorphic-dompurify";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
@@ -33,6 +32,7 @@ import {
   deleteCmsUser,
   updateCmsUserRole,
 } from "@/lib/repositories/cms-user-repository";
+import { sanitizeRichTextHtml } from "@/lib/utils";
 
 function redirectToUsers(params: string) {
   redirect(`/dashboard/users${params}` as never);
@@ -165,7 +165,7 @@ export async function saveReportAction(formData: FormData) {
       ? { publishedAt: nextReport.publishedAt }
       : {}),
     coverImageSrc,
-    bodyHtml: DOMPurify.sanitize(nextReport.bodyHtml),
+    bodyHtml: sanitizeRichTextHtml(nextReport.bodyHtml),
   });
 
   revalidatePath("/dashboard/reports");

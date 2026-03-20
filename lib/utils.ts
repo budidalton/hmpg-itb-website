@@ -65,6 +65,26 @@ export function getYearFromDateString(value: string) {
   return String(date.getFullYear());
 }
 
+export function sanitizeRichTextHtml(html: string) {
+  return html
+    .replace(
+      /<(script|style|iframe|object|embed|form|input|button|textarea|select|option|link|meta)[^>]*>[\s\S]*?<\/\1>/gi,
+      "",
+    )
+    .replace(
+      /<(script|style|iframe|object|embed|form|input|button|textarea|select|option|link|meta)\b[^>]*\/?>/gi,
+      "",
+    )
+    .replace(/\s+on[a-z]+\s*=\s*(".*?"|'.*?'|[^\s>]+)/gi, "")
+    .replace(/\s+style\s*=\s*(".*?"|'.*?'|[^\s>]+)/gi, "")
+    .replace(/\s+srcdoc\s*=\s*(".*?"|'.*?'|[^\s>]+)/gi, "")
+    .replace(
+      /\s+(href|src)\s*=\s*(['"])\s*(javascript:|data:text\/html)[\s\S]*?\2/gi,
+      "",
+    )
+    .replace(/\s+(href|src)\s*=\s*(javascript:|data:text\/html)[^\s>]*/gi, "");
+}
+
 export function compareReportsByPublishedAtDesc(
   left: Pick<ReportRecord, "publishedAt">,
   right: Pick<ReportRecord, "publishedAt">,
