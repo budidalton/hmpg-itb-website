@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 
 import type { ReportRecord } from "@/lib/data/types";
-import { reportCategoryOptions } from "@/lib/cms/config";
 import {
   CMS_UPLOAD_SIZE_LIMIT_LABEL,
   cn,
@@ -32,6 +31,7 @@ import { Button } from "@/components/ui/button";
 
 const draftBodyFallback =
   "<section><h2>Ringkasan</h2><p>Mulai tulis laporan di sini.</p></section>";
+const customCategoryValue = "__custom__";
 
 function FilePickerField({
   defaultLabel,
@@ -122,6 +122,7 @@ function FilePickerField({
 }
 
 export function ReportWorkspace({
+  categorySuggestions,
   currentQuery,
   error,
   reports,
@@ -134,6 +135,7 @@ export function ReportWorkspace({
   deleteAction,
   totalReports,
 }: {
+  categorySuggestions: string[];
   currentQuery: string;
   error?: string | null;
   reports: ReportRecord[];
@@ -201,8 +203,22 @@ export function ReportWorkspace({
     };
   }, [isDirty]);
 
-  const defaultCategory =
-    selectedReport?.category ?? reportCategoryOptions[0]?.value;
+  const defaultCategoryLabel = selectedReport?.categoryLabel ?? "";
+  const hasPresetCategory = categorySuggestions.includes(defaultCategoryLabel);
+  const [selectedCategoryOption, setSelectedCategoryOption] = useState(
+    hasPresetCategory
+      ? defaultCategoryLabel
+      : defaultCategoryLabel
+        ? customCategoryValue
+        : (categorySuggestions[0] ?? customCategoryValue),
+  );
+  const [customCategoryLabel, setCustomCategoryLabel] = useState(
+    hasPresetCategory ? "" : defaultCategoryLabel,
+  );
+  const effectiveCategoryLabel =
+    selectedCategoryOption === customCategoryValue
+      ? customCategoryLabel
+      : selectedCategoryOption;
   const previewHref = selectedReport
     ? `/dashboard/reports/preview/${selectedReport.slug}`
     : undefined;
@@ -434,6 +450,7 @@ export function ReportWorkspace({
                         label="Ringkasan singkat"
                         name="excerpt"
                         placeholder="Tulis ringkasan pendek yang akan muncul di halaman daftar laporan."
+                        required
                         rows={5}
                         value={selectedReport?.excerpt ?? ""}
                       />
@@ -442,27 +459,49 @@ export function ReportWorkspace({
                         label="Author"
                         name="author"
                         placeholder="Contoh: Divisi Pengabdian Masyarakat"
+                        required
                         value={selectedReport?.author ?? ""}
                       />
 
                       <label className="block space-y-2">
                         <span className="text-brand-ink text-sm font-semibold">
-                          Kategori
+                          Kategori <span className="text-brand-maroon">*</span>
                         </span>
+                        <input
+                          name="categoryLabel"
+                          type="hidden"
+                          value={effectiveCategoryLabel}
+                        />
                         <select
                           className="border-brand-sand/80 focus:border-brand-maroon h-12 w-full rounded-[1rem] border bg-white px-4 text-sm outline-none"
-                          defaultValue={defaultCategory}
-                          name="category"
+                          onChange={(event) =>
+                            setSelectedCategoryOption(event.target.value)
+                          }
+                          required
+                          value={selectedCategoryOption}
                         >
-                          {reportCategoryOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
+                          {categorySuggestions.map((categoryLabel) => (
+                            <option key={categoryLabel} value={categoryLabel}>
+                              {categoryLabel}
                             </option>
                           ))}
+                          <option value={customCategoryValue}>Lainnya</option>
                         </select>
+                        {selectedCategoryOption === customCategoryValue ? (
+                          <input
+                            className="border-brand-sand/80 focus:border-brand-maroon h-12 w-full rounded-[1rem] border bg-white px-4 text-sm outline-none"
+                            onChange={(event) =>
+                              setCustomCategoryLabel(event.target.value)
+                            }
+                            placeholder="Tulis kategori baru"
+                            required
+                            type="text"
+                            value={customCategoryLabel}
+                          />
+                        ) : null}
                         <p className="text-brand-body text-xs leading-6">
-                          Pilih kategori utama. Related report akan dipilih
-                          otomatis berdasarkan kategori ini.
+                          Pilih kategori yang sudah ada. Jika belum tersedia,
+                          pilih Lainnya lalu isi kategori baru.
                         </p>
                       </label>
                     </div>
@@ -704,7 +743,10 @@ function FieldBlock({
 }) {
   return (
     <label className="block space-y-2">
-      <span className="text-brand-ink text-sm font-semibold">{label}</span>
+      <span className="text-brand-ink text-sm font-semibold">
+        {label}
+        {required ? <span className="text-brand-maroon"> *</span> : null}
+      </span>
       <input
         className="border-brand-sand/80 focus:border-brand-maroon h-12 w-full rounded-[1rem] border bg-white px-4 text-sm outline-none"
         defaultValue={value}
@@ -723,21 +765,27 @@ function TextAreaBlock({
   value,
   placeholder,
   rows,
+  required = false,
 }: {
   label: string;
   name: string;
   value: string;
   placeholder?: string;
   rows: number;
+  required?: boolean;
 }) {
   return (
     <label className="block space-y-2">
-      <span className="text-brand-ink text-sm font-semibold">{label}</span>
+      <span className="text-brand-ink text-sm font-semibold">
+        {label}
+        {required ? <span className="text-brand-maroon"> *</span> : null}
+      </span>
       <textarea
         className="border-brand-sand/80 focus:border-brand-maroon min-h-32 w-full rounded-[1rem] border bg-white px-4 py-3 text-sm outline-none"
         defaultValue={value}
         name={name}
         placeholder={placeholder}
+        required={required}
         rows={rows}
       />
     </label>

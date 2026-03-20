@@ -1,5 +1,6 @@
 import { AdminShell } from "@/components/dashboard/admin-shell";
 import { ReportWorkspace } from "@/components/dashboard/report-workspace";
+import { getReportCategorySuggestions } from "@/lib/cms/config";
 import { deleteReportAction, saveReportAction } from "@/lib/actions/admin";
 import { requireReportsSession } from "@/lib/auth/session";
 import { filterReports, getStore } from "@/lib/repositories/content-repository";
@@ -23,6 +24,7 @@ export default async function DashboardReportsPage({
   const selectedSlug =
     typeof params.report === "string" ? params.report : undefined;
   const reports = filteredReports;
+  const categorySuggestions = getReportCategorySuggestions(store.reports);
   const selectedReport = creatingNew
     ? undefined
     : selectedSlug
@@ -35,6 +37,7 @@ export default async function DashboardReportsPage({
     <AdminShell pathname="/dashboard/reports" session={session}>
       <ReportWorkspace
         currentQuery={currentQuery}
+        categorySuggestions={categorySuggestions}
         deleteAction={deleteReportAction}
         error={error}
         isAdmin={session.role === "admin"}

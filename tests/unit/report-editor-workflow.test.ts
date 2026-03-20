@@ -1,3 +1,4 @@
+import { buildReportInputFromForm } from "@/lib/cms/form-values";
 import { seedReports } from "@/lib/data/seed";
 import {
   applyFeaturedState,
@@ -65,6 +66,22 @@ describe("report editor workflow helpers", () => {
 
     expect(state.publishedAt).toMatch(/^20\d\d-/);
     expect(state.year).toMatch(/^20\d\d$/);
+  });
+
+  it("slugifies custom category labels from the guided form", () => {
+    const formData = new FormData();
+
+    formData.set("title", "Laporan Kategori Baru");
+    formData.set("excerpt", "Ringkasan");
+    formData.set("author", "Codex QA");
+    formData.set("categoryLabel", "Riset Lapangan Khusus");
+    formData.set("bodyHtml", "<p>Isi</p>");
+    formData.set("status", "draft");
+
+    const input = buildReportInputFromForm(formData);
+
+    expect(input.categoryLabel).toBe("Riset Lapangan Khusus");
+    expect(input.category).toBe("riset-lapangan-khusus");
   });
 
   it("keeps only one featured report active at a time", () => {

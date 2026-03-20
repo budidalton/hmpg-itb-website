@@ -622,6 +622,19 @@ export function getReportCategoryLabel(value: string) {
   return getReportCategoryOption(value)?.label ?? "Editorial";
 }
 
+export function getReportCategorySuggestions(
+  reports: Pick<ReportRecord, "categoryLabel">[] = [],
+) {
+  return Array.from(
+    new Set([
+      ...reportCategoryOptions.map((option) => option.label),
+      ...reports
+        .map((report) => report.categoryLabel.trim())
+        .filter((label) => label.length > 0),
+    ]),
+  ).sort((left, right) => left.localeCompare(right, "id"));
+}
+
 export const cmsOwnedSettingKeys = getFieldsFromSections(
   siteSettingsSections,
 ).map((field) => field.key);

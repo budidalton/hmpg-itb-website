@@ -12,6 +12,7 @@ import {
   reportEditorSections,
   siteSettingsSections,
 } from "@/lib/cms/config";
+import { slugify } from "@/lib/utils";
 
 function parseMultiline(value: FormDataEntryValue | null) {
   return String(value ?? "")
@@ -148,18 +149,22 @@ export function buildReportInputFromForm(
   const id = String(formData.get("id") ?? "").trim();
   const hasFeaturedField = formData.has("featured");
   const hasStatusField = formData.has("status");
+  const categoryLabel = readText(
+    formData,
+    "categoryLabel",
+    currentValue?.categoryLabel ?? "",
+  );
+  const category = readText(formData, "category", currentValue?.category ?? "");
 
   return {
     ...(id ? { id } : {}),
     title: readText(formData, "title", currentValue?.title ?? ""),
     slug: readText(formData, "slug", currentValue?.slug ?? ""),
     excerpt: readText(formData, "excerpt", currentValue?.excerpt ?? "", true),
-    category: readText(formData, "category", currentValue?.category ?? ""),
-    categoryLabel: readText(
-      formData,
-      "categoryLabel",
-      currentValue?.categoryLabel ?? "",
-    ),
+    category:
+      category ||
+      (categoryLabel ? slugify(categoryLabel) : (currentValue?.category ?? "")),
+    categoryLabel,
     coverImageSrc: readText(
       formData,
       "coverImageSrc",

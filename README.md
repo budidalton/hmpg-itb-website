@@ -1,5 +1,3 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
 ## Getting Started
 
 First, run the development server:
@@ -20,17 +18,28 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Learn More
+## Supabase Keepalive
 
-To learn more about Next.js, take a look at the following resources:
+If your Supabase project can pause after inactivity, you can keep it warm with:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Endpoint: `/api/cron/supabase-keepalive`
+- Auth: `Authorization: Bearer <CRON_SECRET>`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The route performs a tiny authenticated read against the `reports` table and returns JSON. It is safe to call from cron-job.org.
 
-## Deploy on Vercel
+### Required environment variable
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Add this in your deployment environment:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+CRON_SECRET=replace-with-a-long-random-secret
+```
+
+### Recommended cron-job.org setup
+
+- URL: `https://your-domain.com/api/cron/supabase-keepalive`
+- Method: `GET`
+- Header: `Authorization: Bearer YOUR_CRON_SECRET`
+- Schedule: once per day
+
+Daily is enough to stay well under Supabase's 7-day inactivity window while keeping load minimal.
