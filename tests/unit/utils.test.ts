@@ -1,5 +1,6 @@
 import {
   formatDisplayDate,
+  normalizeRichTextHref,
   sanitizeRichTextHtml,
   slugify,
   uniqueBy,
@@ -38,5 +39,23 @@ describe("utils", () => {
         '<p onclick="alert(1)">Halo</p><script>alert(1)</script><a href="javascript:alert(1)">Klik</a><img src="/image.png" onerror="alert(1)" />',
       ),
     ).toBe('<p>Halo</p><a>Klik</a><img src="/image.png" />');
+  });
+
+  it("normalizes external rich text links without affecting internal links", () => {
+    expect(normalizeRichTextHref("google.com")).toBe("https://google.com");
+    expect(normalizeRichTextHref("www.google.com")).toBe(
+      "https://www.google.com",
+    );
+    expect(normalizeRichTextHref("https://google.com")).toBe(
+      "https://google.com",
+    );
+    expect(normalizeRichTextHref("/reports")).toBe("/reports");
+    expect(normalizeRichTextHref("#ringkasan")).toBe("#ringkasan");
+  });
+
+  it("rewrites stored links without protocol to use https", () => {
+    expect(sanitizeRichTextHtml('<p><a href="google.com">Google</a></p>')).toBe(
+      '<p><a href="https://google.com">Google</a></p>',
+    );
   });
 });

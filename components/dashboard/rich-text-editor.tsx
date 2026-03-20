@@ -1,14 +1,25 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ImageIcon, LinkIcon, LoaderCircleIcon } from "lucide-react";
+import {
+  ImageIcon,
+  LinkIcon,
+  ListIcon,
+  ListOrderedIcon,
+  LoaderCircleIcon,
+} from "lucide-react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import Image from "@tiptap/extension-image";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 
-import { cn } from "@/lib/utils";
+import {
+  CMS_UPLOAD_SIZE_LIMIT_LABEL,
+  cn,
+  getCmsImageUploadError,
+  normalizeRichTextHref,
+} from "@/lib/utils";
 
 export function RichTextEditor({
   name,
@@ -71,6 +82,14 @@ export function RichTextEditor({
       return;
     }
 
+    const validationError = getCmsImageUploadError(file);
+
+    if (validationError) {
+      setUploadError(validationError);
+      event.target.value = "";
+      return;
+    }
+
     setUploadError("");
     setIsUploadingImage(true);
 
@@ -126,8 +145,14 @@ export function RichTextEditor({
               editor?.chain().focus().toggleHeading({ level: 2 }).run(),
           },
           {
-            label: "List",
+            label: "Bullet List",
             action: () => editor?.chain().focus().toggleBulletList().run(),
+            icon: <ListIcon size={14} />,
+          },
+          {
+            label: "Ordered List",
+            action: () => editor?.chain().focus().toggleOrderedList().run(),
+            icon: <ListOrderedIcon size={14} />,
           },
           {
             label: "Quote",
@@ -141,7 +166,13 @@ export function RichTextEditor({
                 return;
               }
 
-              editor?.chain().focus().setLink({ href }).run();
+              const normalizedHref = normalizeRichTextHref(href);
+
+              if (!normalizedHref) {
+                return;
+              }
+
+              editor?.chain().focus().setLink({ href: normalizedHref }).run();
             },
             icon: <LinkIcon size={14} />,
           },
@@ -163,13 +194,25 @@ export function RichTextEditor({
         ].map((item) => (
           <button
             className={cn(
-              "border-brand-stroke/30 bg-brand-surface text-brand-ink inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold tracking-[0.16em] uppercase",
+              "border-brand-stroke/30 bg-brand-surface text-brand-ink hover:border-brand-maroon/50 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold tracking-[0.16em] uppercase transition-colors",
               item.label === "Bold" &&
                 editor?.isActive("bold") &&
-                "border-brand-maroon",
+                "border-brand-maroon bg-brand-maroon/5",
               item.label === "Italic" &&
                 editor?.isActive("italic") &&
-                "border-brand-maroon",
+                "border-brand-maroon bg-brand-maroon/5",
+              item.label === "Heading" &&
+                editor?.isActive("heading", { level: 2 }) &&
+                "border-brand-maroon bg-brand-maroon/5",
+              item.label === "Bullet List" &&
+                editor?.isActive("bulletList") &&
+                "border-brand-maroon bg-brand-maroon/5",
+              item.label === "Ordered List" &&
+                editor?.isActive("orderedList") &&
+                "border-brand-maroon bg-brand-maroon/5",
+              item.label === "Quote" &&
+                editor?.isActive("blockquote") &&
+                "border-brand-maroon bg-brand-maroon/5",
               item.label === "Image" &&
                 isUploadingImage &&
                 "border-brand-maroon",
@@ -195,8 +238,14 @@ export function RichTextEditor({
       <input name={name} type="hidden" value={htmlValue} />
       <EditorContent editor={editor} />
       {uploadError ? (
-        <p className="font-manrope text-brand-maroon text-sm">{uploadError}</p>
-      ) : null}
+        <p className="rounded-[0.9rem] border border-[#831618]/18 bg-[#831618]/8 px-3 py-2 text-sm font-medium text-[#831618]">
+          {uploadError}
+        </p>
+      ) : (
+        <p className="text-brand-body text-xs leading-6">
+          Upload gambar inline hingga {CMS_UPLOAD_SIZE_LIMIT_LABEL}.
+        </p>
+      )}
     </div>
   );
 }

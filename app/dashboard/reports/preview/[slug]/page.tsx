@@ -7,7 +7,11 @@ import {
   getDashboardReportBySlug,
   getRelatedReports,
 } from "@/lib/repositories/content-repository";
-import { formatDisplayDate, getReportPreviewImage } from "@/lib/utils";
+import {
+  formatDisplayDate,
+  formatReportStatusLabel,
+  getReportPreviewImage,
+} from "@/lib/utils";
 
 interface DashboardReportPreviewPageProps {
   params: Promise<{ slug: string }>;
@@ -26,6 +30,7 @@ export default async function DashboardReportPreviewPage({
 
   const relatedReports =
     report.status === "published" ? await getRelatedReports(slug) : [];
+  const coverImage = getReportPreviewImage(report);
 
   return (
     <div className="editorial-shell bg-brand-surface min-h-screen">
@@ -48,7 +53,7 @@ export default async function DashboardReportPreviewPage({
             </Link>
             {report.status === "published" ? (
               <Link
-                className="bg-brand-maroon rounded-xl px-4 py-2 text-sm font-semibold text-white"
+                className="bg-brand-maroon rounded-xl px-4 py-2 text-sm font-semibold !text-white"
                 href={`/reports/${report.slug}`}
                 target="_blank"
               >
@@ -60,41 +65,53 @@ export default async function DashboardReportPreviewPage({
       </div>
 
       <main className="pb-24">
-        <section className="mx-auto max-w-7xl px-4 py-16 md:px-8">
-          <div className="max-w-5xl space-y-6">
-            <span className="bg-brand-blush text-brand-maroon inline-flex rounded-full px-3 py-1 text-[0.65rem] font-bold tracking-[0.18em] uppercase">
-              {report.categoryLabel}
-            </span>
-            <h2 className="font-epilogue text-brand-ink text-4xl leading-tight font-bold md:text-6xl">
-              {report.title}
-            </h2>
-            <div className="border-brand-muted/30 flex flex-wrap gap-8 border-t pt-6">
-              <div>
-                <p className="text-brand-body text-[0.65rem] font-bold tracking-[0.18em] uppercase">
-                  Status
-                </p>
-                <p className="text-brand-ink mt-2 font-semibold">
-                  {report.status}
-                </p>
-              </div>
-              <div>
-                <p className="text-brand-body text-[0.65rem] font-bold tracking-[0.18em] uppercase">
-                  Tanggal
-                </p>
-                <p className="text-brand-ink mt-2 font-semibold">
-                  {formatDisplayDate(report.publishedAt) ||
-                    "Belum dipublikasikan"}
-                </p>
-              </div>
-              <div>
-                <p className="text-brand-body text-[0.65rem] font-bold tracking-[0.18em] uppercase">
-                  Penulis
-                </p>
-                <p className="text-brand-ink mt-2 font-semibold">
-                  {report.author || "HMPG ITB"}
-                </p>
+        <section className="mx-auto max-w-5xl px-4 py-16 md:px-8">
+          <div className="space-y-8">
+            <div className="space-y-6">
+              <span className="bg-brand-blush text-brand-maroon inline-flex rounded-full px-3 py-1 text-[0.65rem] font-bold tracking-[0.18em] uppercase">
+                {report.categoryLabel}
+              </span>
+              <h2 className="font-epilogue text-brand-ink text-4xl leading-tight font-bold md:text-6xl">
+                {report.title}
+              </h2>
+              <div className="border-brand-muted/30 flex flex-wrap gap-8 border-t pt-6">
+                <div>
+                  <p className="text-brand-body text-[0.65rem] font-bold tracking-[0.18em] uppercase">
+                    Status
+                  </p>
+                  <p className="text-brand-ink mt-2 font-semibold">
+                    {formatReportStatusLabel(report.status)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-brand-body text-[0.65rem] font-bold tracking-[0.18em] uppercase">
+                    Tanggal
+                  </p>
+                  <p className="text-brand-ink mt-2 font-semibold">
+                    {formatDisplayDate(report.publishedAt) ||
+                      "Belum dipublikasikan"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-brand-body text-[0.65rem] font-bold tracking-[0.18em] uppercase">
+                    Penulis
+                  </p>
+                  <p className="text-brand-ink mt-2 font-semibold">
+                    {report.author || "HMPG ITB"}
+                  </p>
+                </div>
               </div>
             </div>
+
+            {coverImage && (
+              <div className="shadow-brand-maroon/10 overflow-hidden rounded-[2.5rem] shadow-2xl">
+                <img
+                  alt={report.title}
+                  className="aspect-[16/9] w-full object-cover"
+                  src={coverImage}
+                />
+              </div>
+            )}
           </div>
         </section>
 

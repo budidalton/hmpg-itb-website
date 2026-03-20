@@ -13,7 +13,12 @@ import {
 
 import type { ReportRecord } from "@/lib/data/types";
 import { reportCategoryOptions } from "@/lib/cms/config";
-import { cn } from "@/lib/utils";
+import {
+  CMS_UPLOAD_SIZE_LIMIT_LABEL,
+  cn,
+  formatReportStatusLabel,
+  getCmsImageUploadError,
+} from "@/lib/utils";
 
 import {
   DashboardBadge,
@@ -32,13 +37,48 @@ function FilePickerField({
   defaultLabel,
   inputName,
   helperText,
+  onErrorChange,
 }: {
   defaultLabel: string;
   inputName: string;
   helperText: string;
+  onErrorChange?: (error: string) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState(defaultLabel);
+  const [fileError, setFileError] = useState("");
+
+  function updateError(error: string) {
+    setFileError(error);
+    onErrorChange?.(error);
+  }
+
+  function clearSelectedFile() {
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+
+    setFileName(defaultLabel);
+  }
+
+  function handleSelectedFile(file: File | null) {
+    if (!file) {
+      clearSelectedFile();
+      updateError("");
+      return;
+    }
+
+    const validationError = getCmsImageUploadError(file);
+
+    if (validationError) {
+      clearSelectedFile();
+      updateError(validationError);
+      return;
+    }
+
+    updateError("");
+    setFileName(file.name);
+  }
 
   return (
     <div className="space-y-2">
@@ -46,10 +86,11 @@ function FilePickerField({
         Preview image
       </span>
       <input
+        accept="image/*"
         className="hidden"
         name={inputName}
         onChange={(event) =>
-          setFileName(event.target.files?.[0]?.name ?? defaultLabel)
+          handleSelectedFile(event.target.files?.[0] ?? null)
         }
         ref={inputRef}
         type="file"
@@ -68,7 +109,14 @@ function FilePickerField({
           <span className="text-brand-body text-sm">{fileName}</span>
         </div>
       </div>
-      <p className="text-brand-body text-xs leading-6">{helperText}</p>
+      <p className="text-brand-body text-xs leading-6">
+        {helperText} Maksimal {CMS_UPLOAD_SIZE_LIMIT_LABEL}.
+      </p>
+      {fileError ? (
+        <p className="rounded-[0.9rem] border border-[#831618]/18 bg-[#831618]/8 px-3 py-2 text-sm font-medium text-[#831618]">
+          {fileError}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -99,6 +147,7 @@ export function ReportWorkspace({
   const [query, setQuery] = useState(currentQuery);
   const [isDirty, setIsDirty] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [coverUploadError, setCoverUploadError] = useState("");
 
   useEffect(() => {
     setQuery(currentQuery);
@@ -281,7 +330,7 @@ export function ReportWorkspace({
                           report.status === "published" ? "success" : "warning"
                         }
                       >
-                        {report.status}
+                        {formatReportStatusLabel(report.status)}
                       </DashboardBadge>
                       {report.featured ? (
                         <DashboardBadge tone="accent">featured</DashboardBadge>
@@ -326,7 +375,12 @@ export function ReportWorkspace({
                 action={saveAction}
                 className="space-y-5"
                 onChange={() => setIsDirty(true)}
-                onSubmit={() => {
+                onSubmit={(event) => {
+                  if (coverUploadError) {
+                    event.preventDefault();
+                    return;
+                  }
+
                   setIsSubmitting(true);
                   setIsDirty(false);
                 }}
@@ -376,6 +430,13 @@ export function ReportWorkspace({
                         value={selectedReport?.excerpt ?? ""}
                       />
 
+                      <FieldBlock
+                        label="Author"
+                        name="author"
+                        placeholder="Contoh: Divisi Pengabdian Masyarakat"
+                        value={selectedReport?.author ?? ""}
+                      />
+
                       <label className="block space-y-2">
                         <span className="text-brand-ink text-sm font-semibold">
                           Kategori
@@ -419,6 +480,7 @@ export function ReportWorkspace({
                             defaultLabel="Belum ada file dipilih"
                             helperText="Upload file baru jika ingin mengganti gambar card. Related report dan daftar publik akan memakai gambar ini."
                             inputName="coverImageFile"
+                            onErrorChange={setCoverUploadError}
                           />
                           {!isAdmin ? (
                             <input
@@ -503,12 +565,6 @@ export function ReportWorkspace({
                           value={selectedReport?.slug ?? ""}
                         />
                         <FieldBlock
-                          label="Author"
-                          name="author"
-                          placeholder="HMPG ITB"
-                          value={selectedReport?.author ?? ""}
-                        />
-                        <FieldBlock
                           label="Edition label"
                           name="editionLabel"
                           placeholder="HMPG Report"
@@ -554,9 +610,11 @@ export function ReportWorkspace({
                             : "Siap disimpan"}
                         </p>
                         <p className="text-brand-body text-xs leading-6">
-                          {selectedReport
-                            ? "Gunakan Preview untuk memeriksa draft tanpa membuka halaman publik."
-                            : "Simpan laporan terlebih dahulu untuk membuka preview privat."}
+                          {coverUploadError
+                            ? coverUploadError
+                            : selectedReport
+                              ? "Gunakan Preview untuk memeriksa draft tanpa membuka halaman publik."
+                              : "Simpan laporan terlebih dahulu untuk membuka preview privat."}
                         </p>
                       </div>
                     </div>
