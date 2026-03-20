@@ -62,8 +62,15 @@ export default async function DashboardUsersPage({
             title="Tambah pengguna"
           />
           <form action={createCmsUserAction} className="mt-5 space-y-4">
-            <Field label="Email" name="email" required type="email" />
             <Field
+              autoComplete="email"
+              label="Email"
+              name="email"
+              required
+              type="email"
+            />
+            <Field
+              autoComplete="new-password"
               label="Password awal"
               minLength={8}
               name="password"
@@ -188,12 +195,14 @@ export default async function DashboardUsersPage({
 }
 
 function Field({
+  autoComplete,
   label,
   name,
   type,
   required,
   minLength,
 }: {
+  autoComplete?: string;
   label: string;
   name: string;
   type: string;
@@ -204,6 +213,7 @@ function Field({
     <label className="block space-y-2">
       <span className="text-brand-ink text-sm font-semibold">{label}</span>
       <input
+        autoComplete={autoComplete}
         className="border-brand-sand/80 focus:border-brand-maroon h-12 w-full rounded-[1rem] border bg-white px-4 text-sm outline-none"
         minLength={minLength}
         name={name}
