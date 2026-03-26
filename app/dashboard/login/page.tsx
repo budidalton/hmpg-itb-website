@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import { loginAction } from "@/lib/actions/auth";
-import { isDemoMode } from "@/lib/repositories/content-repository";
+import { getStore, isDemoMode } from "@/lib/repositories/content-repository";
 
 import {
   DashboardAuthLayout,
@@ -21,6 +21,7 @@ interface DashboardLoginPageProps {
 export default async function DashboardLoginPage({
   searchParams,
 }: DashboardLoginPageProps) {
+  const store = await getStore();
   const params = await searchParams;
   const error = typeof params.error === "string" ? params.error : null;
   const message = typeof params.message === "string" ? params.message : null;
@@ -30,6 +31,7 @@ export default async function DashboardLoginPage({
     <DashboardAuthLayout
       description="Masuk ke CMS internal untuk mengelola laporan, konten publik, dan akses dashboard sesuai role Anda."
       eyebrow="Internal CMS"
+      leftImageSrc={store.pages.home.heroImageSrc}
       leftDescription="Gunakan akun CMS untuk mengelola laporan atau seluruh konten publik HMPG ITB sesuai role Anda."
       leftTitle="HMPG ITB CMS"
       titleLines={["Login", "Dashboard"]}

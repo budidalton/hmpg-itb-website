@@ -1,7 +1,4 @@
-import Image from "next/image";
 import type { ReactNode } from "react";
-
-import loginPhotoEdited from "../../public/assets/figma-auth/login-photo-edited.png";
 
 import { cn } from "@/lib/utils";
 
@@ -9,6 +6,7 @@ interface DashboardAuthLayoutProps {
   children: ReactNode;
   description: string;
   eyebrow: string;
+  leftImageSrc: string;
   leftDescription: string;
   leftTitle: string;
   titleLines: string[];
@@ -18,6 +16,7 @@ export function DashboardAuthLayout({
   children,
   description,
   eyebrow,
+  leftImageSrc,
   leftDescription,
   leftTitle,
   titleLines,
@@ -34,13 +33,10 @@ export function DashboardAuthLayout({
 
           <div className="relative z-10 mx-auto flex w-full max-w-[32rem] flex-col gap-8">
             <div className="relative aspect-[4/5] overflow-hidden bg-[#ebe2d0] shadow-[0_0_0_8px_#831618,0_25px_50px_-12px_rgba(0,0,0,0.25)]">
-              <Image
+              <img
                 alt=""
-                className="object-cover"
-                fill
-                priority
-                sizes="50vw"
-                src={loginPhotoEdited}
+                className="h-full w-full object-cover object-[95%_center]"
+                src={leftImageSrc}
               />
             </div>
 

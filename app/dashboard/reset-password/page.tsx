@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import { resetPasswordAction } from "@/lib/actions/auth";
+import { getStore } from "@/lib/repositories/content-repository";
 
 import {
   DashboardAuthLayout,
@@ -16,6 +17,7 @@ interface ResetPasswordPageProps {
 export default async function ResetPasswordPage({
   searchParams,
 }: ResetPasswordPageProps) {
+  const store = await getStore();
   const params = await searchParams;
   const error = typeof params.error === "string" ? params.error : null;
   const message = typeof params.message === "string" ? params.message : null;
@@ -24,6 +26,7 @@ export default async function ResetPasswordPage({
     <DashboardAuthLayout
       description="Masukkan email CMS Anda, lalu kami akan mengirim tautan untuk mengatur ulang password."
       eyebrow="Internal CMS"
+      leftImageSrc={store.pages.home.heroImageSrc}
       leftDescription="Akses CMS HMPG ITB tetap memakai identitas visual yang sama agar proses login dan pemulihan akun terasa konsisten."
       leftTitle="HMPG ITB CMS"
       titleLines={["Lupa", "Password"]}
