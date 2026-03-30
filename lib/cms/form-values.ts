@@ -160,7 +160,12 @@ export function buildReportInputFromForm(
     ...(id ? { id } : {}),
     title: readText(formData, "title", currentValue?.title ?? ""),
     slug: readText(formData, "slug", currentValue?.slug ?? ""),
-    excerpt: readText(formData, "excerpt", currentValue?.excerpt ?? "", true),
+    excerpt: readText(
+      formData,
+      "excerpt",
+      currentValue?.excerpt ?? "",
+      true,
+    ).slice(0, 80),
     category:
       category ||
       (categoryLabel ? slugify(categoryLabel) : (currentValue?.category ?? "")),

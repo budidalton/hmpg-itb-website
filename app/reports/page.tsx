@@ -53,6 +53,11 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
   const status = normalizeStatus(params.status);
   const requestedPage =
     typeof params.page === "string" ? Number.parseInt(params.page, 10) : 1;
+  const hasActiveFilters =
+    Boolean(query.trim()) ||
+    year !== "all" ||
+    category !== "all" ||
+    status !== "all";
 
   const publishedReports = store.reports.filter(
     (report) => report.status === "published",
@@ -76,11 +81,12 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
     ([value, label]) => ({ value, label }),
   );
 
-  const featuredReport =
-    resolveFeaturedReport(publishedReports) ?? filteredReports[0];
-  const latestReports = filteredReports.filter(
-    (report) => report.slug !== featuredReport?.slug,
-  );
+  const featuredReport = hasActiveFilters
+    ? null
+    : (resolveFeaturedReport(publishedReports) ?? filteredReports[0] ?? null);
+  const latestReports = featuredReport
+    ? filteredReports.filter((report) => report.slug !== featuredReport.slug)
+    : filteredReports;
   const totalPages = Math.max(
     1,
     Math.ceil(latestReports.length / REPORTS_PER_PAGE),
@@ -98,6 +104,20 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
     latestReports.length === 0
       ? 0
       : Math.min(currentPage * REPORTS_PER_PAGE, latestReports.length);
+  const resultsSectionTitle = hasActiveFilters
+    ? query
+      ? `Hasil pencarian untuk "${query}"`
+      : "Hasil filter laporan"
+    : reportsPage.latestSectionTitle;
+  const resultsSectionDescription = hasActiveFilters
+    ? buildFilterSummary({
+        query,
+        year,
+        category,
+        status,
+        categories,
+      })
+    : null;
 
   return (
     <div className="bg-brand-surface min-h-screen">
@@ -274,29 +294,50 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
 
             <section className="mt-16">
               <div className="border-brand-muted/30 flex items-end justify-between gap-4 border-b pb-4">
-                <h2 className="font-epilogue text-brand-ink text-2xl font-bold tracking-[-0.03em]">
-                  {reportsPage.latestSectionTitle}
-                </h2>
+                <div className="space-y-2">
+                  <h2 className="font-epilogue text-brand-ink text-2xl font-bold tracking-[-0.03em]">
+                    {resultsSectionTitle}
+                  </h2>
+                  {resultsSectionDescription ? (
+                    <p className="font-manrope text-brand-body max-w-[42rem] text-sm leading-6">
+                      {resultsSectionDescription}
+                    </p>
+                  ) : null}
+                </div>
                 <p className="font-manrope text-brand-stroke hidden text-[10px] font-bold tracking-[0.1em] uppercase sm:block">
                   Menampilkan {displayCountStart}-{displayCountEnd} dari{" "}
                   {latestReports.length} dokumen
                 </p>
               </div>
 
-              <div className="mt-8 grid gap-x-8 gap-y-12 md:grid-cols-2 xl:grid-cols-3">
-                {paginatedReports.map((report) => (
-                  <ReportGridCard key={report.id} report={report} />
-                ))}
-              </div>
+              {paginatedReports.length > 0 ? (
+                <>
+                  <div className="mt-8 grid gap-x-8 gap-y-12 md:grid-cols-2 xl:grid-cols-3">
+                    {paginatedReports.map((report) => (
+                      <ReportGridCard key={report.id} report={report} />
+                    ))}
+                  </div>
 
-              <PaginationNav
-                category={category}
-                currentPage={currentPage}
-                query={query}
-                status={status}
-                totalPages={totalPages}
-                year={year}
-              />
+                  <PaginationNav
+                    category={category}
+                    currentPage={currentPage}
+                    query={query}
+                    status={status}
+                    totalPages={totalPages}
+                    year={year}
+                  />
+                </>
+              ) : (
+                <div className="mt-8 border border-[rgba(140,113,110,0.16)] bg-white px-6 py-10 text-center shadow-[0_10px_30px_rgba(31,27,16,0.05)]">
+                  <h3 className="font-epilogue text-brand-ink text-xl font-bold tracking-[-0.03em]">
+                    Tidak ada laporan yang cocok
+                  </h3>
+                  <p className="font-manrope text-brand-body mx-auto mt-3 max-w-[32rem] text-sm leading-7">
+                    Coba ubah kata kunci atau reset filter untuk melihat laporan
+                    lain yang tersedia.
+                  </p>
+                </div>
+              )}
             </section>
           </div>
         </section>
@@ -572,6 +613,46 @@ function normalizeStatus(
   }
 
   return "all";
+}
+
+function buildFilterSummary({
+  query,
+  year,
+  category,
+  status,
+  categories,
+}: {
+  query: string;
+  year: string;
+  category: string;
+  status: string;
+  categories: { value: string; label: string }[];
+}) {
+  const parts: string[] = [];
+
+  if (query) {
+    parts.push(`kata kunci "${query}"`);
+  }
+
+  if (year !== "all") {
+    parts.push(`tahun ${year}`);
+  }
+
+  if (category !== "all") {
+    const categoryLabel =
+      categories.find((item) => item.value === category)?.label ?? category;
+    parts.push(`kategori ${categoryLabel}`);
+  }
+
+  if (status !== "all") {
+    parts.push(`status ${status}`);
+  }
+
+  if (parts.length === 0) {
+    return "Menampilkan seluruh arsip laporan publik.";
+  }
+
+  return `Menampilkan laporan untuk ${parts.join(", ")}.`;
 }
 
 function buildPaginationItems(currentPage: number, totalPages: number) {

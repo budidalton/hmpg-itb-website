@@ -52,9 +52,6 @@ export function DashboardAuthLayout({
         </section>
 
         <section className="relative flex min-h-screen items-start justify-center px-5 py-8 sm:px-8 sm:py-10 lg:min-h-0 lg:items-center lg:px-16 lg:py-20 xl:px-24">
-          <div className="absolute right-12 bottom-12 hidden h-24 w-24 rounded-xl border border-[#dfbfbc] opacity-30 lg:block" />
-          <div className="absolute right-[4.6rem] bottom-[4.6rem] hidden h-8 w-8 rotate-45 bg-[#fde089] opacity-60 lg:block" />
-
           <div className="w-full max-w-[28rem] space-y-8 sm:space-y-10">
             <div className="space-y-3">
               <div className="flex items-center gap-2">

@@ -300,11 +300,13 @@ export async function deleteReportAction(formData: FormData) {
   await requireReportsSession();
   const returnQuery = String(formData.get("returnQuery") ?? "").trim();
   const id = String(formData.get("id") ?? "");
+  const nextFeaturedId = String(formData.get("nextFeaturedId") ?? "").trim();
   if (!id) return;
 
-  await deleteReport(id);
+  await deleteReport(id, { nextFeaturedId });
   revalidatePath("/dashboard/reports");
   revalidatePath("/reports");
+  revalidatePath("/");
   const searchParams = new URLSearchParams({
     message: "Laporan berhasil dihapus.",
   });

@@ -36,6 +36,7 @@ export default async function DashboardReportsPage({
   return (
     <AdminShell pathname="/dashboard/reports" session={session}>
       <ReportWorkspace
+        allReports={store.reports}
         currentQuery={currentQuery}
         categorySuggestions={categorySuggestions}
         deleteAction={deleteReportAction}

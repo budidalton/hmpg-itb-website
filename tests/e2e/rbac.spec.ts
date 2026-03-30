@@ -29,6 +29,10 @@ async function deleteReportIfExists(page: Page, slug: string) {
     new RegExp(`/dashboard/reports\\?report=${slug}$`),
   );
   await page.getByRole("button", { name: "Hapus Laporan" }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Hapus laporan" })
+    .click();
   await expect(page).toHaveURL(/\/dashboard\/reports\?message=/);
 }
 
@@ -66,7 +70,7 @@ test("admins can provision writers and writers are limited to report management"
     ).toBeVisible();
     await page.goto("/dashboard/users");
     await expect(
-      page.getByRole("heading", { name: "Kelola akun CMS" }),
+      page.getByRole("heading", { name: "Manajemen pengguna" }),
     ).toBeVisible();
 
     const createUserForm = page
@@ -111,7 +115,10 @@ test("admins can provision writers and writers are limited to report management"
     await page
       .locator('textarea[name="excerpt"]')
       .fill("Report created by writer role.");
-    await page.locator('select[name="category"]').selectOption("editorial");
+    await page.locator('input[name="author"]').fill("Writer QA");
+    await page.getByRole("combobox", { name: /Kategori/ }).selectOption({
+      label: "Editorial",
+    });
     await page.locator('select[name="status"]').selectOption("published");
     await page.locator('input[name="featured"]').check();
     await page
@@ -151,6 +158,10 @@ test("admins can provision writers and writers are limited to report management"
 
     await page.goto(`/dashboard/reports?report=${reportSlug}`);
     await page.getByRole("button", { name: "Hapus Laporan" }).click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Hapus laporan" })
+      .click();
     await expect(page).toHaveURL(/\/dashboard\/reports\?message=/);
 
     await page.goto("/reports");

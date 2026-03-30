@@ -84,6 +84,23 @@ describe("report editor workflow helpers", () => {
     expect(input.category).toBe("riset-lapangan-khusus");
   });
 
+  it("limits the short summary to 80 characters", () => {
+    const formData = new FormData();
+    const longExcerpt =
+      "Ringkasan ini sengaja dibuat sangat panjang agar melewati delapan puluh karakter dan terpotong otomatis.";
+
+    formData.set("title", "Laporan Dengan Ringkasan Panjang");
+    formData.set("excerpt", longExcerpt);
+    formData.set("categoryLabel", "Editorial");
+    formData.set("bodyHtml", "<p>Isi</p>");
+    formData.set("status", "draft");
+
+    const input = buildReportInputFromForm(formData);
+
+    expect(input.excerpt).toHaveLength(80);
+    expect(longExcerpt.startsWith(input.excerpt)).toBe(true);
+  });
+
   it("keeps only one featured report active at a time", () => {
     const target = {
       ...seedReports[1]!,

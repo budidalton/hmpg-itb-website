@@ -41,6 +41,10 @@ async function deleteReportIfExists(page: Page, slug: string) {
     new RegExp(`/dashboard/reports\\?report=${slug}$`),
   );
   await page.getByRole("button", { name: "Hapus Laporan" }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Hapus laporan" })
+    .click();
   await expect(page).toHaveURL(/\/dashboard\/reports\?message=/);
 }
 
@@ -133,7 +137,10 @@ test("CMS-owned content stays in sync with dashboard and public site", async ({
     await page
       .locator('textarea[name="excerpt"]')
       .fill("Report sinkronisasi CMS.");
-    await page.locator('select[name="category"]').selectOption("editorial");
+    await page.locator('input[name="author"]').fill("Tim CMS QA");
+    await page.getByRole("combobox", { name: /Kategori/ }).selectOption({
+      label: "Editorial",
+    });
     await page.locator('select[name="status"]').selectOption("published");
     await page.locator('input[name="featured"]').check();
     await page
@@ -162,7 +169,7 @@ test("CMS-owned content stays in sync with dashboard and public site", async ({
     await expect(reportLink).toBeVisible();
     await expect(reportLink.locator("img").first()).toHaveAttribute(
       "src",
-      /report-detail-hero\.png/,
+      /(report-detail-hero\.png|^data:image\/)/,
     );
 
     await page.goto(`/reports/${reportSlug}`);

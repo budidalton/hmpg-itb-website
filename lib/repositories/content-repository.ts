@@ -669,17 +669,100 @@ export async function saveReport(
   return fromSupabaseReportRow(result.data);
 }
 
-export async function deleteReport(id: string) {
+export async function deleteReport(
+  id: string,
+  options?: { nextFeaturedId?: string },
+) {
+  const nextFeaturedId = getNonEmptyString(options?.nextFeaturedId);
+  const store = await getStore();
+  const targetReport = store.reports.find((report) => report.id === id);
+  const nextFeaturedReport = nextFeaturedId
+    ? store.reports.find((report) => report.id === nextFeaturedId)
+    : undefined;
+
+  if (
+    nextFeaturedId &&
+    (!nextFeaturedReport ||
+      nextFeaturedReport.id === id ||
+      nextFeaturedReport.status !== "published")
+  ) {
+    throw new Error("Featured pengganti harus berasal dari laporan published.");
+  }
+
   if (isDemoMode()) {
+    const nextReports = demoStore.reports
+      .filter((report) => report.id !== id)
+      .map((report) => ({
+        ...report,
+        featured:
+          targetReport?.featured && nextFeaturedId
+            ? report.id === nextFeaturedId
+            : report.featured,
+      }));
+
+    if (targetReport?.featured && !nextFeaturedId) {
+      const latestPublished = nextReports
+        .filter((report) => report.status === "published")
+        .sort(compareReportsByPublishedAtDesc)[0];
+
+      demoStore = {
+        ...demoStore,
+        reports: nextReports.map((report) => ({
+          ...report,
+          featured: latestPublished ? report.id === latestPublished.id : false,
+        })),
+      };
+
+      return;
+    }
+
     demoStore = {
       ...demoStore,
-      reports: demoStore.reports.filter((report) => report.id !== id),
+      reports: nextReports,
     };
 
     return;
   }
 
   const supabase = getAdminSupabaseClient();
+
+  if (targetReport?.featured) {
+    const clearFeaturedResult = await supabase
+      .from("reports")
+      .update({ featured: false })
+      .eq("featured", true);
+
+    if (clearFeaturedResult.error) {
+      throw clearFeaturedResult.error;
+    }
+
+    if (nextFeaturedId) {
+      const assignFeaturedResult = await supabase
+        .from("reports")
+        .update({ featured: true })
+        .eq("id", nextFeaturedId);
+
+      if (assignFeaturedResult.error) {
+        throw assignFeaturedResult.error;
+      }
+    } else {
+      const fallbackFeaturedReport = store.reports
+        .filter((report) => report.id !== id && report.status === "published")
+        .sort(compareReportsByPublishedAtDesc)[0];
+
+      if (fallbackFeaturedReport) {
+        const fallbackFeaturedResult = await supabase
+          .from("reports")
+          .update({ featured: true })
+          .eq("id", fallbackFeaturedReport.id);
+
+        if (fallbackFeaturedResult.error) {
+          throw fallbackFeaturedResult.error;
+        }
+      }
+    }
+  }
+
   const result = await supabase.from("reports").delete().eq("id", id);
 
   if (result.error) {

@@ -26,6 +26,7 @@ import {
   DashboardPanel,
   DashboardPanelHeader,
 } from "@/components/dashboard/dashboard-primitives";
+import { DashboardModal } from "@/components/dashboard/dashboard-modal";
 import { RichTextEditor } from "@/components/dashboard/rich-text-editor";
 import { Button } from "@/components/ui/button";
 
@@ -122,6 +123,7 @@ function FilePickerField({
 }
 
 export function ReportWorkspace({
+  allReports,
   categorySuggestions,
   currentQuery,
   error,
@@ -135,6 +137,7 @@ export function ReportWorkspace({
   deleteAction,
   totalReports,
 }: {
+  allReports: ReportRecord[];
   categorySuggestions: string[];
   currentQuery: string;
   error?: string | null;
@@ -152,10 +155,26 @@ export function ReportWorkspace({
   const [isDirty, setIsDirty] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [coverUploadError, setCoverUploadError] = useState("");
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+  const [pendingNavigationHref, setPendingNavigationHref] = useState<
+    string | null
+  >(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [nextFeaturedId, setNextFeaturedId] = useState("");
 
   useEffect(() => {
     setQuery(currentQuery);
   }, [currentQuery]);
+
+  useEffect(() => {
+    setIsDirty(false);
+    setIsSubmitting(false);
+    setCoverUploadError("");
+    setIsLeaveModalOpen(false);
+    setPendingNavigationHref(null);
+    setIsDeleteModalOpen(false);
+    setNextFeaturedId("");
+  }, [selectedReport?.id, isCreatingNew]);
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -172,26 +191,46 @@ export function ReportWorkspace({
         return;
       }
 
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+
       const target = event.target;
       if (!(target instanceof HTMLElement)) {
         return;
       }
 
       const link = target.closest("a[href]");
-      if (!link) {
+      if (!(link instanceof HTMLAnchorElement)) {
         return;
       }
 
       const href = link.getAttribute("href");
-      if (!href || href.startsWith("#")) {
+      if (
+        !href ||
+        href.startsWith("#") ||
+        link.target === "_blank" ||
+        link.hasAttribute("download")
+      ) {
         return;
       }
 
-      if (window.confirm("Perubahan belum disimpan. Tinggalkan editor?")) {
+      const nextUrl = new URL(link.href, window.location.href);
+
+      if (nextUrl.href === window.location.href) {
         return;
       }
 
       event.preventDefault();
+      setPendingNavigationHref(nextUrl.href);
+      setIsLeaveModalOpen(true);
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -223,6 +262,15 @@ export function ReportWorkspace({
     ? `/dashboard/reports/preview/${selectedReport.slug}`
     : undefined;
   const isMobileEditorOpen = isCreatingNew || isViewingSelectedReport;
+  const deleteFormId = selectedReport
+    ? `delete-report-${selectedReport.id}`
+    : "delete-report";
+  const replacementFeaturedOptions = selectedReport
+    ? allReports.filter(
+        (report) =>
+          report.id !== selectedReport.id && report.status === "published",
+      )
+    : [];
 
   function buildReportsHref({
     report,
@@ -249,6 +297,22 @@ export function ReportWorkspace({
     return queryString
       ? `/dashboard/reports?${queryString}`
       : "/dashboard/reports";
+  }
+
+  function closeLeaveModal() {
+    setIsLeaveModalOpen(false);
+    setPendingNavigationHref(null);
+  }
+
+  function confirmLeaveEditor() {
+    const href = pendingNavigationHref;
+
+    setIsDirty(false);
+    closeLeaveModal();
+
+    if (href) {
+      window.location.assign(href);
+    }
   }
 
   return (
@@ -447,7 +511,9 @@ export function ReportWorkspace({
                       />
 
                       <TextAreaBlock
+                        helperText="Maksimal 80 karakter agar kartu laporan tetap ringkas."
                         label="Ringkasan singkat"
+                        maxLength={80}
                         name="excerpt"
                         placeholder="Tulis ringkasan pendek yang akan muncul di halaman daftar laporan."
                         required
@@ -693,17 +759,15 @@ export function ReportWorkspace({
               </form>
 
               {selectedReport ? (
-                <form action={deleteAction} className="pb-2">
-                  <input name="id" type="hidden" value={selectedReport.id} />
-                  <input
-                    name="returnQuery"
-                    type="hidden"
-                    value={currentQuery}
-                  />
-                  <Button type="submit" variant="outline">
+                <div className="pb-2">
+                  <Button
+                    onClick={() => setIsDeleteModalOpen(true)}
+                    type="button"
+                    variant="outline"
+                  >
                     Hapus Laporan
                   </Button>
-                </form>
+                </div>
               ) : null}
             </>
           ) : (
@@ -722,6 +786,90 @@ export function ReportWorkspace({
           )}
         </div>
       </section>
+
+      {selectedReport ? (
+        <form action={deleteAction} className="hidden" id={deleteFormId}>
+          <input name="id" type="hidden" value={selectedReport.id} />
+          <input name="returnQuery" type="hidden" value={currentQuery} />
+          <input name="nextFeaturedId" type="hidden" value={nextFeaturedId} />
+        </form>
+      ) : null}
+
+      <DashboardModal
+        description="Perubahan yang belum disimpan akan hilang jika Anda berpindah halaman sekarang."
+        onClose={closeLeaveModal}
+        open={isLeaveModalOpen}
+        primaryAction={
+          <Button onClick={confirmLeaveEditor} type="button">
+            Tinggalkan editor
+          </Button>
+        }
+        secondaryAction={
+          <Button onClick={closeLeaveModal} type="button" variant="outline">
+            Tetap di sini
+          </Button>
+        }
+        title="Perubahan belum disimpan"
+        tone="danger"
+      />
+
+      <DashboardModal
+        description={
+          selectedReport?.featured
+            ? "Laporan ini sedang menjadi highlight utama di halaman reports. Pilih pengganti agar featured tetap terarah, atau lanjutkan tanpa pengganti."
+            : "Laporan yang dihapus tidak bisa dipulihkan dari dashboard."
+        }
+        onClose={() => setIsDeleteModalOpen(false)}
+        open={isDeleteModalOpen}
+        primaryAction={
+          <Button form={deleteFormId} type="submit" variant="primary">
+            Hapus laporan
+          </Button>
+        }
+        secondaryAction={
+          <Button
+            onClick={() => setIsDeleteModalOpen(false)}
+            type="button"
+            variant="outline"
+          >
+            Batal
+          </Button>
+        }
+        title={
+          selectedReport?.featured
+            ? "Hapus featured report ini?"
+            : "Hapus laporan ini?"
+        }
+        tone="danger"
+      >
+        {selectedReport?.featured ? (
+          <div className="space-y-3">
+            <label className="block space-y-2">
+              <span className="text-brand-ink text-sm font-semibold">
+                Pindahkan featured ke laporan lain
+              </span>
+              <select
+                className="border-brand-sand/80 focus:border-brand-maroon h-12 w-full rounded-[1rem] border bg-white px-4 text-sm outline-none"
+                onChange={(event) => setNextFeaturedId(event.target.value)}
+                value={nextFeaturedId}
+              >
+                <option value="">
+                  Pilih nanti, gunakan laporan terbaru secara otomatis
+                </option>
+                {replacementFeaturedOptions.map((report) => (
+                  <option key={report.id} value={report.id}>
+                    {report.title}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <p className="text-brand-body text-xs leading-6">
+              Hanya laporan berstatus published yang bisa dijadikan featured
+              pengganti.
+            </p>
+          </div>
+        ) : null}
+      </DashboardModal>
     </div>
   );
 }
@@ -760,34 +908,59 @@ function FieldBlock({
 }
 
 function TextAreaBlock({
+  helperText,
   label,
+  maxLength,
   name,
   value,
   placeholder,
   rows,
   required = false,
 }: {
+  helperText?: string;
   label: string;
+  maxLength?: number;
   name: string;
   value: string;
   placeholder?: string;
   rows: number;
   required?: boolean;
 }) {
+  const [currentLength, setCurrentLength] = useState(value.length);
+
   return (
     <label className="block space-y-2">
-      <span className="text-brand-ink text-sm font-semibold">
-        {label}
-        {required ? <span className="text-brand-maroon"> *</span> : null}
-      </span>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="text-brand-ink text-sm font-semibold">
+          {label}
+          {required ? <span className="text-brand-maroon"> *</span> : null}
+        </span>
+        {typeof maxLength === "number" ? (
+          <span
+            className={cn(
+              "text-xs font-medium",
+              currentLength >= maxLength
+                ? "text-brand-maroon"
+                : "text-brand-body",
+            )}
+          >
+            {currentLength}/{maxLength} karakter
+          </span>
+        ) : null}
+      </div>
       <textarea
         className="border-brand-sand/80 focus:border-brand-maroon min-h-32 w-full rounded-[1rem] border bg-white px-4 py-3 text-sm outline-none"
         defaultValue={value}
+        maxLength={maxLength}
         name={name}
+        onChange={(event) => setCurrentLength(event.target.value.length)}
         placeholder={placeholder}
         required={required}
         rows={rows}
       />
+      {helperText ? (
+        <p className="text-brand-body text-xs leading-6">{helperText}</p>
+      ) : null}
     </label>
   );
 }
