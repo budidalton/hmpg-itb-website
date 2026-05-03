@@ -43,3 +43,25 @@ CRON_SECRET=replace-with-a-long-random-secret
 - Schedule: once per day
 
 Daily is enough to stay well under Supabase's 7-day inactivity window while keeping load minimal.
+
+## Supabase Password Reset
+
+Set the deployed site origin in your hosting environment so reset-password emails
+open the public website instead of a local development server:
+
+```bash
+NEXT_PUBLIC_SITE_URL=https://your-domain.com
+```
+
+In Supabase Auth URL Configuration, add the deployed reset route to the allowed
+redirect URLs:
+
+```text
+https://your-domain.com/dashboard/reset-password/complete
+```
+
+Set Supabase's Site URL to the same deployed origin:
+
+```text
+https://your-domain.com
+```

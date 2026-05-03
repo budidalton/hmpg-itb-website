@@ -2,6 +2,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import {
@@ -33,6 +34,48 @@ function getSupabaseAuthClient() {
 
 function redirectToDashboard(target: string) {
   redirect(target as never);
+}
+
+function isLocalhostUrl(value: string) {
+  try {
+    const url = new URL(value.includes("://") ? value : `https://${value}`);
+    return ["localhost", "127.0.0.1", "::1"].includes(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
+function normalizeSiteUrl(value: string) {
+  const url = new URL(value.includes("://") ? value : `https://${value}`);
+  return url.origin.replace(/\/+$/, "");
+}
+
+async function getRequestSiteUrl() {
+  const requestHeaders = await headers();
+  const host =
+    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+
+  if (!host) {
+    return null;
+  }
+
+  const proto = requestHeaders.get("x-forwarded-proto") ?? "https";
+  return `${proto}://${host}`;
+}
+
+async function getPasswordResetRedirectUrl() {
+  const configuredSiteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ??
+    process.env.VERCEL_URL;
+  const requestSiteUrl = await getRequestSiteUrl();
+
+  const siteUrl =
+    configuredSiteUrl && (!isLocalhostUrl(configuredSiteUrl) || !requestSiteUrl)
+      ? configuredSiteUrl
+      : requestSiteUrl;
+
+  return `${normalizeSiteUrl(siteUrl ?? "http://localhost:3000")}/dashboard/reset-password/complete`;
 }
 
 export async function loginAction(formData: FormData) {
@@ -103,7 +146,7 @@ export async function resetPasswordAction(formData: FormData) {
   }
 
   const result = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/dashboard/reset-password/complete`,
+    redirectTo: await getPasswordResetRedirectUrl(),
   });
 
   if (result.error) {
